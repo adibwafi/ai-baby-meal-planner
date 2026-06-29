@@ -566,7 +566,7 @@ export default function HomePage() {
               {/* Generated timestamp */}
               <p className="text-center text-[10px] pt-1 pb-2"
                 style={{ color: "var(--text-muted)" }}>
-                Dibuat pukul {new Date(matrix.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} · Gemini 1.5 Flash
+                Dibuat pukul {new Date(matrix.generatedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} · Groq LLaMA 3
               </p>
             </div>
           ) : (
