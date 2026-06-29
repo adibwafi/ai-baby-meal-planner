@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { MealMatrix, MealEntry } from "./api/generate-meals/route";
+import { supabase } from "../lib/supabase";
 
 /* ─── SVG Icon Components ──────────────────── */
 const IconHome = ({ size = 22, active = false }) => (
@@ -182,7 +183,6 @@ function MealCard({
   const delayClass = ["stagger-1","stagger-2","stagger-3","stagger-4","stagger-5"][index];
   const isBreakfast = slot.id === "breakfast";
 
-  // Build TikTok search query URL
   const tiktokSearchUrl = `https://www.tiktok.com/search?q=${encodeURIComponent("Resep MPASI " + meal.name)}`;
 
   return (
@@ -346,51 +346,106 @@ export default function HomePage() {
   const [selectedMealForSave, setSelectedMealForSave] = useState<MealEntry | null>(null);
   const [showFolderModal, setShowFolderModal] = useState(false);
 
-  // Load from localStorage on mount
+  // Sync state helpers checking Supabase environment variables status
+  const isSupabaseConfigured = 
+    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== "https://placeholder-project.supabase.co";
+
+  /* ─── 1. INITIAL MOUNT LOAD DATA ─── */
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    async function loadData() {
+      // Always load profile from localstorage
       const storedName = localStorage.getItem("mpasi_childName");
       if (storedName) setChildName(storedName);
 
       const storedAllergies = localStorage.getItem("mpasi_allergies");
       if (storedAllergies) setAllergies(JSON.parse(storedAllergies));
 
-      const storedFavorites = localStorage.getItem("mpasi_favorites");
-      if (storedFavorites) setFavorites(JSON.parse(storedFavorites));
+      if (isSupabaseConfigured) {
+        try {
+          // Fetch Fridge Inventory from Supabase
+          const { data: invData } = await supabase.from("fridge_inventory").select("name");
+          if (invData) {
+            setIngredients(invData.map((row) => row.name));
+          }
+
+          // Fetch Folders from Supabase
+          const { data: foldData } = await supabase.from("folders").select("id, name");
+          if (foldData && foldData.length > 0) {
+            setFolders(foldData);
+          }
+
+          // Fetch Favorites from Supabase
+          const { data: favData } = await supabase.from("favorite_meals").select("*");
+          if (favData) {
+            const formatted = favData.map((row) => ({
+              id: row.id,
+              folderId: row.folder_id,
+              meal: {
+                name: row.name,
+                description: row.description || "",
+                ingredients: row.ingredients,
+                instructions: row.instructions,
+                cookingTime: row.cooking_time,
+                nutritionHighlight: row.nutrition_highlight || "",
+              }
+            }));
+            setFavorites(formatted);
+          }
+          return; // Skip loading favorites/folders from localstorage if Supabase loaded successfully
+        } catch (e) {
+          console.warn("Supabase fetch failed, falling back to localStorage", e);
+        }
+      }
+
+      // LocalStorage Fallbacks
+      const storedFavs = localStorage.getItem("mpasi_favorites");
+      if (storedFavs) setFavorites(JSON.parse(storedFavs));
 
       const storedFolders = localStorage.getItem("mpasi_folders");
       if (storedFolders) setFolders(JSON.parse(storedFolders));
     }
-  }, []);
 
-  // Save to localStorage when updated
+    loadData();
+  }, [isSupabaseConfigured]);
+
   const saveProfileData = (name: string, allergyList: string[]) => {
     localStorage.setItem("mpasi_childName", name);
     localStorage.setItem("mpasi_allergies", JSON.stringify(allergyList));
   };
 
-  const saveFavoritesData = (favList: typeof favorites, folderList: typeof folders) => {
-    localStorage.setItem("mpasi_favorites", JSON.stringify(favList));
-    localStorage.setItem("mpasi_folders", JSON.stringify(folderList));
-  };
-
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 5  ? "Selamat Dini Hari" :
-    hour < 11 ? "Selamat Pagi" :
-    hour < 15 ? "Selamat Siang" :
-    hour < 18 ? "Selamat Sore" : "Selamat Malam";
-
-  function addIngredient(name: string) {
+  /* ─── 2. FRIDGE INVENTORY ACTIONS ─── */
+  async function addIngredient(name: string) {
     const trimmed = name.trim();
-    if (trimmed && !ingredients.includes(trimmed)) {
-      setIngredients((prev) => [...prev, trimmed]);
+    if (!trimmed || ingredients.includes(trimmed)) {
+      setInputValue("");
+      return;
+    }
+
+    const updated = [...ingredients, trimmed];
+    setIngredients(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from("fridge_inventory").insert([{ name: trimmed }]);
+      } catch (e) {
+        console.error("Failed to sync new ingredient to Supabase", e);
+      }
     }
     setInputValue("");
   }
 
-  function removeIngredient(name: string) {
-    setIngredients((prev) => prev.filter((i) => i !== name));
+  async function removeIngredient(name: string) {
+    const updated = ingredients.filter((i) => i !== name);
+    setIngredients(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from("fridge_inventory").delete().eq("name", name);
+      } catch (e) {
+        console.error("Failed to delete ingredient from Supabase", e);
+      }
+    }
   }
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -400,6 +455,135 @@ export default function HomePage() {
     }
     if (e.key === "Backspace" && !inputValue && ingredients.length) {
       removeIngredient(ingredients[ingredients.length - 1]);
+    }
+  }
+
+  /* ─── 3. ALLERGY ACTIONS ─── */
+  function addAllergy() {
+    const allergy = newAllergyInput.trim();
+    if (allergy && !allergies.includes(allergy)) {
+      const updated = [...allergies, allergy];
+      setAllergies(updated);
+      saveProfileData(childName, updated);
+    }
+    setNewAllergyInput("");
+  }
+
+  function removeAllergy(name: string) {
+    const updated = allergies.filter((a) => a !== name);
+    setAllergies(updated);
+    saveProfileData(childName, updated);
+  }
+
+  /* ─── 4. FAVORITES & FOLDER ACTIONS ─── */
+  async function handleInitiateSave(meal: MealEntry) {
+    const existing = favorites.find((f) => f.meal.name === meal.name);
+    if (existing) {
+      // Delete item
+      const updated = favorites.filter((f) => f.meal.name !== meal.name);
+      setFavorites(updated);
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from("favorite_meals").delete().eq("id", existing.id);
+        } catch (e) {
+          console.error("Failed to delete favorite from Supabase", e);
+        }
+      } else {
+        localStorage.setItem("mpasi_favorites", JSON.stringify(updated));
+      }
+    } else {
+      setSelectedMealForSave(meal);
+      setShowFolderModal(true);
+    }
+  }
+
+  async function handleConfirmSaveToFolder(folderId: string) {
+    if (!selectedMealForSave) return;
+    const randomId = Math.random().toString(36).substring(7);
+    const newFav = {
+      id: randomId,
+      meal: selectedMealForSave,
+      folderId
+    };
+
+    const updated = [...favorites, newFav];
+    setFavorites(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from("favorite_meals").insert([
+          {
+            id: randomId,
+            folder_id: folderId,
+            name: selectedMealForSave.name,
+            description: selectedMealForSave.description,
+            ingredients: selectedMealForSave.ingredients,
+            instructions: selectedMealForSave.instructions,
+            cooking_time: selectedMealForSave.cookingTime,
+            nutrition_highlight: selectedMealForSave.nutritionHighlight
+          }
+        ]);
+      } catch (e) {
+        console.error("Failed to insert favorite to Supabase", e);
+      }
+    } else {
+      localStorage.setItem("mpasi_favorites", JSON.stringify(updated));
+    }
+
+    setShowFolderModal(false);
+    setSelectedMealForSave(null);
+  }
+
+  async function handleCreateFolder() {
+    const name = newFolderName.trim();
+    if (!name) return;
+
+    const randomId = Math.random().toString(36).substring(7);
+    const newFolder = { id: randomId, name };
+
+    const updatedFolders = [...folders, newFolder];
+    setFolders(updatedFolders);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from("folders").insert([{ id: randomId, name }]);
+      } catch (e) {
+        console.error("Failed to create folder in Supabase", e);
+      }
+    } else {
+      localStorage.setItem("mpasi_folders", JSON.stringify(updatedFolders));
+    }
+    setNewFolderName("");
+  }
+
+  async function handleDeleteFolder(folderId: string) {
+    if (folderId === "default") return;
+
+    const updatedFolders = folders.filter((f) => f.id !== folderId);
+    setFolders(updatedFolders);
+
+    const updatedFavs = favorites.map((f) => 
+      f.folderId === folderId ? { ...f, folderId: "default" } : f
+    );
+    setFavorites(updatedFavs);
+
+    if (isSupabaseConfigured) {
+      try {
+        // Safe update all affected items inside folder to default
+        await supabase.from("favorite_meals").update({ folder_id: "default" }).eq("folder_id", folderId);
+        // Delete the folder from table
+        await supabase.from("folders").delete().eq("id", folderId);
+      } catch (e) {
+        console.error("Failed to delete folder from Supabase", e);
+      }
+    } else {
+      localStorage.setItem("mpasi_folders", JSON.stringify(updatedFolders));
+      localStorage.setItem("mpasi_favorites", JSON.stringify(updatedFavs));
+    }
+
+    if (activeFolderId === folderId) {
+      setActiveFolderId("default");
     }
   }
 
@@ -435,90 +619,20 @@ export default function HomePage() {
     }
   }
 
-  /* ─── Profile Operations ─── */
-  function addAllergy() {
-    const allergy = newAllergyInput.trim();
-    if (allergy && !allergies.includes(allergy)) {
-      const updated = [...allergies, allergy];
-      setAllergies(updated);
-      saveProfileData(childName, updated);
-    }
-    setNewAllergyInput("");
-  }
-
-  function removeAllergy(name: string) {
-    const updated = allergies.filter((a) => a !== name);
-    setAllergies(updated);
-    saveProfileData(childName, updated);
-  }
-
-  /* ─── Folder & Favorites Operations ─── */
-  function handleInitiateSave(meal: MealEntry) {
-    // Check if already favorited
-    const existingIndex = favorites.findIndex((f) => f.meal.name === meal.name);
-    if (existingIndex > -1) {
-      // Remove it if favorited again
-      const updated = favorites.filter((f) => f.meal.name !== meal.name);
-      setFavorites(updated);
-      saveFavoritesData(updated, folders);
-    } else {
-      // Open selector to choose folder
-      setSelectedMealForSave(meal);
-      setShowFolderModal(true);
-    }
-  }
-
-  function handleConfirmSaveToFolder(folderId: string) {
-    if (!selectedMealForSave) return;
-    const newFav = {
-      id: Math.random().toString(36).substring(7),
-      meal: selectedMealForSave,
-      folderId
-    };
-    const updated = [...favorites, newFav];
-    setFavorites(updated);
-    saveFavoritesData(updated, folders);
-    setShowFolderModal(false);
-    setSelectedMealForSave(null);
-  }
-
-  function handleCreateFolder() {
-    const name = newFolderName.trim();
-    if (name) {
-      const newFolder = {
-        id: Math.random().toString(36).substring(7),
-        name
-      };
-      const updatedFolders = [...folders, newFolder];
-      setFolders(updatedFolders);
-      saveFavoritesData(favorites, updatedFolders);
-      setNewFolderName("");
-    }
-  }
-
-  function handleDeleteFolder(folderId: string) {
-    if (folderId === "default") return;
-    const updatedFolders = folders.filter((f) => f.id !== folderId);
-    // Move favorited items in that folder to default folder
-    const updatedFavs = favorites.map((f) => 
-      f.folderId === folderId ? { ...f, folderId: "default" } : f
-    );
-    setFolders(updatedFolders);
-    setFavorites(updatedFavs);
-    saveFavoritesData(updatedFavs, updatedFolders);
-    if (activeFolderId === folderId) {
-      setActiveFolderId("default");
-    }
-  }
-
   const suggestionsToShow = SUGGESTED_INGREDIENTS.filter(
     (s) => !ingredients.includes(s)
   ).slice(0, 8);
 
-  // Filtered favorites by active folder
   const favoritesToShow = favorites.filter((f) => 
     activeFolderId === "default" ? true : f.folderId === activeFolderId
   );
+
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 5  ? "Selamat Dini Hari" :
+    hour < 11 ? "Selamat Pagi" :
+    hour < 15 ? "Selamat Siang" :
+    hour < 18 ? "Selamat Sore" : "Selamat Malam";
 
   return (
     <>
@@ -560,7 +674,7 @@ export default function HomePage() {
                 {[
                   { value: "5",     label: "Menu/Hari",    color: "var(--color-teal-400)"   },
                   { value: "<30",   label: "Menit Masak",  color: "var(--color-amber-300)"  },
-                  { value: "100%",  label: "TikTok Link",  color: "var(--color-teal-300)"   },
+                  { value: isSupabaseConfigured ? "Supabase" : "Local",  label: "Penyimpanan",  color: "var(--color-teal-300)"   },
                 ].map((stat) => (
                   <div key={stat.label} className="flex flex-col items-center flex-1">
                     <span className="text-2xl font-extrabold leading-none"
@@ -842,7 +956,7 @@ export default function HomePage() {
                 {favoritesToShow.map((fav, i) => (
                   <MealCard
                     key={fav.id}
-                    slot={MEAL_SLOTS[i % MEAL_SLOTS.length]} // Mock slot design matching index
+                    slot={MEAL_SLOTS[i % MEAL_SLOTS.length]}
                     meal={fav.meal}
                     index={i}
                     onSaveFavorite={handleInitiateSave}
@@ -947,24 +1061,25 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Developer Info / App Settings */}
+              {/* Database / Sync Settings */}
               <div className="rounded-2xl p-4" style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)" }}>
                 <h3 className="text-sm font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-                  Informasi Aplikasi
+                  Penyimpanan Database
                 </h3>
-                <div className="space-y-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                  <div className="flex justify-between py-1 border-b border-[rgba(255,255,255,0.05)]">
-                    <span>Versi Aplikasi</span>
-                    <span className="font-mono">v1.2.0 (PWA)</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-xs py-1 border-b border-[rgba(255,255,255,0.05)]">
+                    <span>Status Koneksi Supabase</span>
+                    <span className="font-bold flex items-center gap-1.5" style={{ color: isSupabaseConfigured ? "var(--color-teal-400)" : "var(--color-amber-300)" }}>
+                      <span className="w-2 h-2 rounded-full" style={{ background: isSupabaseConfigured ? "var(--color-teal-400)" : "var(--color-amber-300)" }} />
+                      {isSupabaseConfigured ? "Tersambung (Cloud)" : "Fallback (Lokal/Offline)"}
+                    </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[rgba(255,255,255,0.05)]">
-                    <span>Engine AI</span>
-                    <span>Groq LLaMA 3.3 70B</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-[rgba(255,255,255,0.05)]">
-                    <span>Penyimpanan Lokal</span>
-                    <span>Aktif (localStorage)</span>
-                  </div>
+
+                  <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                    {isSupabaseConfigured 
+                      ? "Bahan kulkas dan resep favorit disimpan secara permanen di server cloud Supabase."
+                      : "Supabase belum dikonfigurasi di .env.local. Data kulkas dan favorit disimpan sementara di memori browser (localStorage) agar tetap dapat digunakan."}
+                  </p>
                 </div>
               </div>
             </section>
