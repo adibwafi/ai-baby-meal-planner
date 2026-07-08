@@ -30,8 +30,8 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0f766e" },
-    { media: "(prefers-color-scheme: light)", color: "#0f766e" },
+    { media: "(prefers-color-scheme: dark)", color: "#FFFDF6" },
+    { media: "(prefers-color-scheme: light)", color: "#FFFDF6" },
   ],
 };
 
@@ -53,11 +53,8 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
       </head>
       <body className="h-full antialiased">
-        {/* Mobile-first container — max 480px, centered on larger screens */}
-        <div
-          className="relative mx-auto flex min-h-full flex-col overflow-hidden"
-          style={{ maxWidth: "480px" }}
-        >
+        {/* Mobile-first container on mobile — max 480px, responsive desktop layouts on wider screens */}
+        <div className="relative mx-auto flex min-h-full flex-col overflow-hidden w-full max-w-[480px] md:max-w-none">
           {children}
         </div>
       </body>
