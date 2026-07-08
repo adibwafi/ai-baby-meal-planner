@@ -6,24 +6,24 @@
    DESIGN TOKENS - PREMIUM EDITORIAL SAGE & WHITE
    ═══════════════════════════════════════════ */
 :root {
-  /* Primary Accent & Brand Color (Muted Sage Green) */
-  --color-brand-primary:   #8FA08A; /* Muted Sage Green */
-  --color-brand-hover:     #7B8C77; /* Slightly darker Sage Green */
-  --color-brand-muted:     #F0F4EF; /* Very Light Sage Green */
+  /* Primary Accent & Brand Color (Vibrant & Elegant Evergreen Green) */
+  --color-brand-primary:   #2A8C60; /* Lively, professional green */
+  --color-brand-hover:     #21734F; /* Darker green for hover states */
+  --color-brand-muted:     #EFF8F4; /* Soft minty pastel background tint */
   
   /* Coral/Terracotta for warm parenting highlights */
   --color-accent-coral:    #E29B8B; 
   --color-accent-coral-bg: #FAF3F0;
 
   /* Emerald/Mint for nutrition highlights */
-  --color-accent-green:    #8FA08A;
-  --color-accent-green-bg: #F0F4EF;
-  --color-accent-green-txt:#4E5A4B;
+  --color-accent-green:    #2A8C60;
+  --color-accent-green-bg: #EFF8F4;
+  --color-accent-green-txt:#1A5C3E;
 
   /* Premium Editorial White Light Palette */
   --bg-base:         #FFFFFF; /* Pure White background */
   --bg-surface:      #FFFFFF;
-  --bg-elevated:     #F0F4EF; /* Very Light Sage */
+  --bg-elevated:     #EFF8F4; /* Very Light Mint Green */
   --bg-card:         #FFFFFF;
   --bg-card-hover:   #F9F9F9; /* alternating section off-white */
 
@@ -31,7 +31,7 @@
   --text-primary:    #111111; /* Deep Charcoal / Near Black */
   --text-secondary:  #555555; /* Slate Gray for body copy */
   --text-muted:      #71717A; /* Muted Slate */
-  --text-accent:     #8FA08A;
+  --text-accent:     #2A8C60;
   --text-amber:      #B39870;
 
   /* Borders & Dividers */
@@ -40,14 +40,14 @@
   --border-strong:   #D1D5DB;
 
   /* Gradients (Soft, high-class overlays) */
-  --gradient-brand:  linear-gradient(135deg, #A2B39D 0%, #8FA08A 100%);
+  --gradient-brand:  linear-gradient(135deg, #3BB37E 0%, #2A8C60 100%);
   --gradient-coral:  linear-gradient(135deg, #F5C6BC 0%, #E29B8B 100%);
   --gradient-card:   none;
-  --gradient-glow:   radial-gradient(circle at top center, rgba(143, 160, 138, 0.05) 0%, transparent 60%);
+  --gradient-glow:   radial-gradient(circle at top center, rgba(42, 140, 96, 0.05) 0%, transparent 60%);
 
   /* Apple/Sana Style Ultra Subtle Shadows */
   --shadow-card:     0 2px 10px rgba(0, 0, 0, 0.01), 0 1px 4px rgba(0, 0, 0, 0.005);
-  --shadow-coral:    0 4px 14px rgba(143, 160, 138, 0.12);
+  --shadow-coral:    0 4px 14px rgba(42, 140, 96, 0.12);
   --shadow-strong:   0 8px 32px rgba(0, 0, 0, 0.02);
 
   /* Corner Radius */
