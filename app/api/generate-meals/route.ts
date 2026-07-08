@@ -22,7 +22,38 @@ export interface MealMatrix {
 }
 
 /* ── System Prompt ────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are a pediatric nutritionist and chef for a 16-month-old toddler. The child eats finely chopped family food.
+/* ── System Prompt Generator ──────────────────────────────── */
+function getSystemPrompt(ageMonths: number): string {
+  let textureGuide = "";
+  let ageRangeText = "";
+  
+  if (ageMonths >= 6 && ageMonths <= 8) {
+    ageRangeText = "bayi usia 6-8 bulan";
+    textureGuide = `
+STRICT PEDIATRIC NUTRITION RULES FOR 6-8 MONTHS:
+- Texture MUST be "Puree Halus / Bubur Saring" (smooth puree, no lumps).
+- Recipes must involve straining (saring), blending (blender), or mashing until very smooth.
+- Absolutely NO added salt (garam), sugar (gula), or honey. Only use natural food flavors.
+- Limit ingredients to basic allergen-safe foods.
+`;
+  } else if (ageMonths >= 9 && ageMonths <= 11) {
+    ageRangeText = "bayi usia 9-11 bulan";
+    textureGuide = `
+STRICT PEDIATRIC NUTRITION RULES FOR 9-11 MONTHS:
+- Texture MUST be "Bubur Kasar / Mashed / Nasi Tim Lumat" (lumpy texture to encourage chewing).
+- Recipes should involve mashing with a fork or chopping coarsely (cincang kasar).
+- Extremely low sodium (sangat sedikit garam, tidak menggunakan gula berlebih).
+`;
+  } else {
+    ageRangeText = `balita usia ${ageMonths} bulan`;
+    textureGuide = `
+STRICT PEDIATRIC NUTRITION RULES FOR 12+ MONTHS:
+- Texture MUST be "Makanan Keluarga Cincang Halus / Potongan Kecil (Soft Table Food)" (easy to chew, bite-sized pieces).
+- Low sodium, low sugar, NOT spicy at all.
+`;
+  }
+
+  return `You are a pediatric nutritionist and chef specializing in MPASI (Makanan Pendamping ASI) for a ${ageRangeText}.
 
 Return a valid JSON object containing a 5-Meal Matrix with keys: breakfast, am_snack, lunch, pm_snack, dinner.
 
@@ -30,17 +61,18 @@ Each meal object must have these exact fields:
 - "name": string (creative dish name in Bahasa Indonesia)
 - "description": string (1-2 sentence description in Bahasa Indonesia)
 - "ingredients": string[] (specific ingredients with quantities)
-- "instructions": string[] (step-by-step cooking instructions in Bahasa Indonesia, max 5 steps)
+- "instructions": string[] (step-by-step cooking instructions in Bahasa Indonesia, STRICTLY maximum 4 steps. Keep steps very short, clear, and direct. Start each step with a clear action verb like Potong, Rebus, Tumis, Kukus, Saring, Haluskan, or Sajikan)
 - "cookingTime": number (total prep + cook time in minutes as integer)
 - "nutritionHighlight": string (key nutritional benefit in Bahasa Indonesia, 1 sentence)
 
 STRICT CONSTRAINTS:
 1. Breakfast "cookingTime" MUST be 30 minutes or less — hard limit for a working mother at 5:30 AM.
 2. Use ONLY the provided fridge ingredients plus basic pantry staples: garam, gula, minyak sayur, bawang putih, bawang merah, kecap manis, tepung terigu, nasi putih, air.
-3. All textures must be safe for a 16-month-old: finely chopped, soft, low sodium, NOT spicy.
+3. ${textureGuide}
 4. Vary protein sources across all 5 meals for balanced nutrition.
 5. Include at least one vegetable in breakfast, lunch, and dinner.
 6. Return ONLY valid raw JSON. Do NOT use markdown code fences. Start with { and end with }.`;
+}
 
 /* ── Helpers ──────────────────────────────────────────── */
 function stripMarkdownFences(raw: string): string {
@@ -59,6 +91,7 @@ export async function POST(request: NextRequest) {
     const ingredients: string[] = body.ingredients ?? [];
     const childName: string = body.childName ?? "Anak";
     const allergies: string[] = body.allergies ?? [];
+    const childAgeMonths: number = Number(body.childAgeMonths ?? 16);
 
     if (!ingredients.length) {
       return Response.json(
@@ -81,7 +114,7 @@ export async function POST(request: NextRequest) {
       ? `\nCRITICAL SAFETY CONSTRAINT: The child is ALLERGIC to: ${allergies.join(", ")}. Do NOT use these ingredients under any circumstances. Even if they are listed as available ingredients, EXCLUDE them from all recipes.` 
       : "";
 
-    const dynamicSystemPrompt = `${SYSTEM_PROMPT}${allergyRules}\nNote: The child's name is ${childName}. Make sure the recommendations fit.`;
+    const dynamicSystemPrompt = `${getSystemPrompt(childAgeMonths)}${allergyRules}\nNote: The child's name is ${childName}. Make sure the recommendations fit.`;
 
     const userPrompt = `Bahan-bahan di kulkasku saat ini:
 ${ingredients.map((i, idx) => `${idx + 1}. ${i}`).join("\n")}
