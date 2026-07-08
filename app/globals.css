@@ -1,75 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════ */
+   DESIGN TOKENS - SANALABS & APPLE MINIMALIST LIGHT
+   ═══════════════════════════════════════════ */
 :root {
-  /* Brand Colors */
-  --color-teal-950:  #042f2e;
-  --color-teal-900:  #134e4a;
-  --color-teal-800:  #115e59;
-  --color-teal-700:  #0f766e;
-  --color-teal-600:  #0d9488;
-  --color-teal-400:  #2dd4bf;
-  --color-teal-300:  #5eead4;
-  --color-amber-400: #fbbf24;
-  --color-amber-300: #fcd34d;
-  --color-amber-200: #fde68a;
+  /* Primary Accent & Brand Color (Stark Black/Charcoal) */
+  --color-brand-primary:   #09090b; /* Zinc 950 for solid buttons, main text */
+  --color-brand-hover:     #27272a; /* Zinc 800 for active hover */
+  --color-brand-muted:     #71717a; /* Zinc 500 for secondary outlines */
+  
+  /* Coral/Terracotta for warm parenting actions */
+  --color-accent-coral:    #ff6b5a; 
+  --color-accent-coral-bg: #fff0ed;
 
-  /* Backgrounds */
-  --bg-base:         #080f0e;
-  --bg-surface:      #0f1a19;
-  --bg-elevated:     #162220;
-  --bg-card:         #1a2826;
-  --bg-card-hover:   #1f302d;
+  /* Emerald/Mint for nutrition and checklists */
+  --color-accent-green:    #10b981;
+  --color-accent-green-bg: #ecfdf5;
+  --color-accent-green-txt:#065f46;
 
-  /* Text */
-  --text-primary:    #f0fafa;
-  --text-secondary:  #94a3a3;
-  --text-muted:      #4a6160;
-  --text-accent:     #2dd4bf;
-  --text-amber:      #fbbf24;
+  /* Sana Labs Bone & Stark White Light Palette */
+  --bg-base:         #f9f9f8; /* Soft warm-sand / off-white */
+  --bg-surface:      #ffffff; /* Stark white card surface */
+  --bg-elevated:     #f2f2f0; /* Soft warm grey for items/pills */
+  --bg-card:         #ffffff;
+  --bg-card-hover:   #fcfcfb;
 
-  /* Borders */
-  --border-subtle:   rgba(45, 212, 191, 0.08);
-  --border-default:  rgba(45, 212, 191, 0.15);
-  --border-strong:   rgba(45, 212, 191, 0.30);
+  /* Text Colors */
+  --text-primary:    #09090b; /* Stark dark gray/black */
+  --text-secondary:  #4b5563; /* Apple-style readable body gray */
+  --text-muted:      #8e8e93; /* System muted gray */
+  --text-accent:     #09090b;
+  --text-amber:      #d28f00;
 
-  /* Gradients */
-  --gradient-brand:  linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
-  --gradient-card:   linear-gradient(145deg, #1a2826 0%, #162220 100%);
-  --gradient-amber:  linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-  --gradient-glow:   radial-gradient(ellipse at 50% 0%, rgba(15,118,110,0.25) 0%, transparent 70%);
+  /* Borders & Dividers */
+  --border-subtle:   #f4f4f5; /* Zinc 100 */
+  --border-default:  #e4e4e7; /* Zinc 200 */
+  --border-strong:   #d1d1d6; /* Zinc 300 / Apple gray */
 
-  /* Shadows */
-  --shadow-card:     0 4px 24px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
-  --shadow-teal:     0 0 30px rgba(15,118,110,0.3), 0 4px 16px rgba(0,0,0,0.4);
-  --shadow-amber:    0 0 20px rgba(251,191,36,0.25);
-  --shadow-glow-sm:  0 0 12px rgba(45,212,191,0.2);
+  /* Gradients (Soft, high-class overlays) */
+  --gradient-brand:  linear-gradient(135deg, #27272a 0%, #09090b 100%);
+  --gradient-coral:  linear-gradient(135deg, #ff8375 0%, #ff6b5a 100%);
+  --gradient-card:   none;
+  --gradient-glow:   radial-gradient(circle at top center, rgba(9, 9, 11, 0.01) 0%, transparent 60%);
 
-  /* Radius */
+  /* Apple-Style Ultra Subtle Shadows */
+  --shadow-card:     0 2px 8px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.01);
+  --shadow-coral:    0 4px 12px rgba(9, 9, 11, 0.06);
+  --shadow-strong:   0 8px 24px rgba(0, 0, 0, 0.04);
+
+  /* Corner Radius */
   --radius-sm:   8px;
-  --radius-md:   14px;
-  --radius-lg:   20px;
-  --radius-xl:   28px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
   --radius-full: 9999px;
 
-  /* Typography */
-  --font-display: 'Outfit', sans-serif;
-  --font-body:    'Inter', sans-serif;
+  /* Font Families */
+  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
 
-  /* Spacing */
+  /* Safe Area Spacers */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ═══════════════════════════════════════════
    BASE RESETS
-═══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
@@ -96,8 +95,8 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    font-weight: 700;
-    line-height: 1.2;
+    font-weight: 600;
+    line-height: 1.25;
     letter-spacing: -0.02em;
   }
 
@@ -107,47 +106,36 @@
 }
 
 /* ═══════════════════════════════════════════
-   GLASS MORPHISM UTILITIES
-═══════════════════════════════════════════ */
+   UTILITY LAYERS
+   ═══════════════════════════════════════════ */
 @layer utilities {
   .glass {
-    background: rgba(26, 40, 38, 0.7);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .glass-strong {
-    background: rgba(22, 34, 32, 0.85);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-default);
   }
 
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-strong);
+  }
+
   .card-surface {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
     box-shadow: var(--shadow-card);
     border-radius: var(--radius-lg);
   }
 
   .teal-glow {
-    box-shadow: var(--shadow-teal);
-  }
-
-  .amber-glow {
-    box-shadow: var(--shadow-amber);
+    box-shadow: var(--shadow-coral);
   }
 
   .text-gradient-teal {
-    background: linear-gradient(135deg, var(--color-teal-300) 0%, var(--color-teal-400) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-amber {
-    background: linear-gradient(135deg, var(--color-amber-300) 0%, var(--color-amber-400) 100%);
+    background: linear-gradient(135deg, var(--text-primary) 0%, #3f3f46 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -163,160 +151,148 @@
 }
 
 /* ═══════════════════════════════════════════
-   COMPONENT CLASSES
-═══════════════════════════════════════════ */
+   APPLE MINIMALIST COMPONENT LAYOUTS
+   ═══════════════════════════════════════════ */
 @layer components {
-  /* ── Primary CTA Button ── */
+  /* ── Stark Black CTA Button ── */
   .btn-primary {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     width: 100%;
-    padding: 1rem 1.5rem;
-    background: var(--gradient-brand);
+    padding: 1.05rem 1.5rem;
+    background: var(--color-brand-primary);
     color: white;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 0.01em;
-    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md);
     border: none;
     cursor: pointer;
-    box-shadow: var(--shadow-teal);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-coral);
   }
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-    pointer-events: none;
-  }
+  
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 40px rgba(15,118,110,0.5), 0 8px 24px rgba(0,0,0,0.4);
+    background: var(--color-brand-hover);
+    transform: translateY(-1px) scale(1.005);
   }
+  
   .btn-primary:active {
-    transform: translateY(0px) scale(0.98);
+    transform: translateY(0px) scale(0.985);
   }
+  
   .btn-primary:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 
-  /* ── Secondary Button ── */
+  /* ── Sleek Outlined Button ── */
   .btn-secondary {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    background: transparent;
-    color: var(--text-accent);
+    padding: 0.85rem 1.35rem;
+    background: var(--bg-surface);
+    color: var(--text-primary);
     font-weight: 600;
-    font-size: 0.875rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-full);
+    font-size: 0.88rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  
   .btn-secondary:hover {
-    background: rgba(45, 212, 191, 0.08);
-    border-color: var(--color-teal-400);
+    background: var(--bg-elevated);
+    border-color: var(--border-strong);
   }
+  
   .btn-secondary:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
 
-  /* ── Tag / Ingredient Pill ── */
+  /* ── Sana Labs Clean Tag Pill ── */
   .tag-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    background: rgba(15, 118, 110, 0.15);
+    gap: 0.3rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--bg-elevated);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-full);
-    color: var(--color-teal-300);
-    font-size: 0.8125rem;
+    color: var(--text-primary);
+    font-size: 0.83rem;
     font-weight: 500;
-    transition: all 0.15s ease;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  
   .tag-pill:hover {
-    background: rgba(15, 118, 110, 0.25);
-    border-color: var(--color-teal-400);
+    background: var(--border-default);
+    border-color: var(--border-strong);
   }
 
-  /* ── Meal Card ── */
+  /* ── Minimalist White Meal Card ── */
   .meal-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.6rem 1.8rem;
     box-shadow: var(--shadow-card);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
   }
-  .meal-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(45,212,191,0.3), transparent);
-  }
+  
   .meal-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border-default);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(15,118,110,0.15);
+    transform: translateY(-2px) scale(1.003);
+    border-color: var(--border-strong);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   }
 
-  /* ── 30-min badge ── */
+  /* ── Visual Milestones / Fast cooking badge ── */
   .badge-fast {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.25rem 0.625rem;
-    background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(251,191,36,0.1) 100%);
-    border: 1px solid rgba(251,191,36,0.4);
+    padding: 0.3rem 0.75rem;
+    background: var(--color-accent-coral-bg);
+    border: 1px solid rgba(255, 107, 90, 0.2);
     border-radius: var(--radius-full);
-    color: var(--color-amber-300);
-    font-size: 0.6875rem;
+    color: var(--color-accent-coral);
+    font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
     text-transform: uppercase;
-    box-shadow: var(--shadow-amber);
-    animation: pulse-amber 2.5s ease-in-out infinite;
+    letter-spacing: 0.02em;
   }
 
-  /* ── Input Field ── */
+  /* ── Clean Stark Input Field ── */
   .input-field {
     width: 100%;
-    padding: 0.875rem 1rem;
-    background: rgba(15, 26, 25, 0.8);
+    padding: 0.95rem 1.2rem;
+    background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-size: 0.9375rem;
-    transition: all 0.2s ease;
+    font-size: 0.93rem;
+    transition: all 0.15s ease;
     outline: none;
   }
+  
   .input-field::placeholder {
     color: var(--text-muted);
   }
+  
   .input-field:focus {
-    border-color: var(--color-teal-600);
-    box-shadow: 0 0 0 3px rgba(15,118,110,0.2);
-    background: rgba(15, 26, 25, 1);
+    border-color: var(--color-brand-primary);
+    box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.05);
   }
 
-  /* ── Bottom Nav ── */
+  /* ── Apple-Style Bottom Nav Shell ── */
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -332,59 +308,57 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 0.75rem 1rem;
-    background: rgba(8, 15, 14, 0.92);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-top: 1px solid var(--border-subtle);
+    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-default);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.02);
   }
 
   .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 1rem;
+    gap: 0.2rem;
+    padding: 0.45rem 0.8rem;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     text-decoration: none;
     border: none;
     background: transparent;
     color: var(--text-muted);
   }
+  
   .nav-item.active {
-    color: var(--color-teal-400);
+    color: var(--color-brand-primary);
   }
+  
   .nav-item:hover {
-    color: var(--text-accent);
-    background: rgba(45, 212, 191, 0.06);
+    color: var(--text-primary);
+    background: var(--bg-base);
   }
 
   .nav-label {
-    font-size: 0.625rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     font-family: var(--font-display);
   }
 }
 
 /* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes pulse-amber {
-  0%, 100% { box-shadow: 0 0 8px rgba(251,191,36,0.2); }
-  50%       { box-shadow: 0 0 18px rgba(251,191,36,0.45); }
-}
-
+   PERFORMANT ANIMATIONS
+   ═══════════════════════════════════════════ */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -399,49 +373,63 @@
 }
 
 @keyframes bounce-dot {
-  0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
-  40%           { transform: scale(1);   opacity: 1;   }
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1.1); opacity: 1;   }
 }
 
 .animate-fade-up {
-  animation: fade-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: fade-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
 .animate-fade-in {
-  animation: fade-in 0.4s ease both;
+  animation: fade-in 0.2s ease both;
 }
+
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    var(--bg-card) 0%,
-    var(--bg-card-hover) 50%,
-    var(--bg-card) 100%
+    #f4f4f5 0%,
+    #fafafa 50%,
+    #f4f4f5 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
+
 .animate-spin-slow {
-  animation: spin-slow 2s linear infinite;
+  animation: spin-slow 3s linear infinite;
 }
 
-/* Stagger delays for cards */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.10s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.20s; }
-.stagger-5 { animation-delay: 0.25s; }
+/* Stagger indices */
+.stagger-1 { animation-delay: 0.02s; }
+.stagger-2 { animation-delay: 0.04s; }
+.stagger-3 { animation-delay: 0.06s; }
+.stagger-4 { animation-delay: 0.08s; }
+.stagger-5 { animation-delay: 0.10s; }
 
-/* Typing dots loader */
+/* AI Loading Dots */
 .dot-loader {
   display: inline-flex;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
 }
 .dot-loader span {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--color-teal-400);
-  animation: bounce-dot 1.4s ease-in-out infinite;
+  background: white;
+  animation: bounce-dot 1.2s ease-in-out infinite;
 }
-.dot-loader span:nth-child(2) { animation-delay: 0.2s; }
-.dot-loader span:nth-child(3) { animation-delay: 0.4s; }
+.dot-loader span:nth-child(2) { animation-delay: 0.15s; }
+.dot-loader span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Uniform Border Radius Overrides to Align with Apple & Sana Labs */
+.rounded-xl {
+  border-radius: var(--radius-md) !important;
+}
+.rounded-2xl {
+  border-radius: var(--radius-lg) !important;
+}
+.rounded-3xl {
+  border-radius: var(--radius-xl) !important;
+}
