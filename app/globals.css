@@ -1,64 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS - SANALABS & APPLE MINIMALIST LIGHT
+   DESIGN TOKENS - PREMIUM EDITORIAL SAGE & WHITE
    ═══════════════════════════════════════════ */
 :root {
-  /* Primary Accent & Brand Color (Stark Black/Charcoal) */
-  --color-brand-primary:   #09090b; /* Zinc 950 for solid buttons, main text */
-  --color-brand-hover:     #27272a; /* Zinc 800 for active hover */
-  --color-brand-muted:     #71717a; /* Zinc 500 for secondary outlines */
+  /* Primary Accent & Brand Color (Muted Sage Green) */
+  --color-brand-primary:   #8FA08A; /* Muted Sage Green */
+  --color-brand-hover:     #7B8C77; /* Slightly darker Sage Green */
+  --color-brand-muted:     #F0F4EF; /* Very Light Sage Green */
   
-  /* Coral/Terracotta for warm parenting actions */
-  --color-accent-coral:    #ff6b5a; 
-  --color-accent-coral-bg: #fff0ed;
+  /* Coral/Terracotta for warm parenting highlights */
+  --color-accent-coral:    #E29B8B; 
+  --color-accent-coral-bg: #FAF3F0;
 
-  /* Emerald/Mint for nutrition and checklists */
-  --color-accent-green:    #10b981;
-  --color-accent-green-bg: #ecfdf5;
-  --color-accent-green-txt:#065f46;
+  /* Emerald/Mint for nutrition highlights */
+  --color-accent-green:    #8FA08A;
+  --color-accent-green-bg: #F0F4EF;
+  --color-accent-green-txt:#4E5A4B;
 
-  /* Sana Labs Bone & Stark White Light Palette */
-  --bg-base:         #f9f9f8; /* Soft warm-sand / off-white */
-  --bg-surface:      #ffffff; /* Stark white card surface */
-  --bg-elevated:     #f2f2f0; /* Soft warm grey for items/pills */
-  --bg-card:         #ffffff;
-  --bg-card-hover:   #fcfcfb;
+  /* Premium Editorial White Light Palette */
+  --bg-base:         #FFFFFF; /* Pure White background */
+  --bg-surface:      #FFFFFF;
+  --bg-elevated:     #F0F4EF; /* Very Light Sage */
+  --bg-card:         #FFFFFF;
+  --bg-card-hover:   #F9F9F9; /* alternating section off-white */
 
   /* Text Colors */
-  --text-primary:    #09090b; /* Stark dark gray/black */
-  --text-secondary:  #4b5563; /* Apple-style readable body gray */
-  --text-muted:      #8e8e93; /* System muted gray */
-  --text-accent:     #09090b;
-  --text-amber:      #d28f00;
+  --text-primary:    #111111; /* Deep Charcoal / Near Black */
+  --text-secondary:  #555555; /* Slate Gray for body copy */
+  --text-muted:      #71717A; /* Muted Slate */
+  --text-accent:     #8FA08A;
+  --text-amber:      #B39870;
 
   /* Borders & Dividers */
-  --border-subtle:   #f4f4f5; /* Zinc 100 */
-  --border-default:  #e4e4e7; /* Zinc 200 */
-  --border-strong:   #d1d1d6; /* Zinc 300 / Apple gray */
+  --border-subtle:   #F9F9F9;
+  --border-default:  #E5E7EB; /* Subtle light gray */
+  --border-strong:   #D1D5DB;
 
   /* Gradients (Soft, high-class overlays) */
-  --gradient-brand:  linear-gradient(135deg, #27272a 0%, #09090b 100%);
-  --gradient-coral:  linear-gradient(135deg, #ff8375 0%, #ff6b5a 100%);
+  --gradient-brand:  linear-gradient(135deg, #A2B39D 0%, #8FA08A 100%);
+  --gradient-coral:  linear-gradient(135deg, #F5C6BC 0%, #E29B8B 100%);
   --gradient-card:   none;
-  --gradient-glow:   radial-gradient(circle at top center, rgba(9, 9, 11, 0.01) 0%, transparent 60%);
+  --gradient-glow:   radial-gradient(circle at top center, rgba(143, 160, 138, 0.05) 0%, transparent 60%);
 
-  /* Apple-Style Ultra Subtle Shadows */
-  --shadow-card:     0 2px 8px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.01);
-  --shadow-coral:    0 4px 12px rgba(9, 9, 11, 0.06);
-  --shadow-strong:   0 8px 24px rgba(0, 0, 0, 0.04);
+  /* Apple/Sana Style Ultra Subtle Shadows */
+  --shadow-card:     0 2px 10px rgba(0, 0, 0, 0.01), 0 1px 4px rgba(0, 0, 0, 0.005);
+  --shadow-coral:    0 4px 14px rgba(143, 160, 138, 0.12);
+  --shadow-strong:   0 8px 32px rgba(0, 0, 0, 0.02);
 
   /* Corner Radius */
   --radius-sm:   8px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --radius-xl:   32px;
+  --radius-md:   12px; /* Inputs & tags */
+  --radius-lg:   16px; /* Cards (rounded-2xl) */
+  --radius-xl:   24px;
   --radius-full: 9999px;
 
   /* Font Families */
-  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-display: 'Playfair Display', 'Outfit', serif;
   --font-body:    'Inter', -apple-system, sans-serif;
 
   /* Safe Area Spacers */
@@ -167,7 +167,7 @@
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 0.95rem;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
     border: none;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -202,7 +202,7 @@
     font-weight: 600;
     font-size: 0.88rem;
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }

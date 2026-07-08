@@ -96,11 +96,24 @@ const TRANSLATIONS = {
     greeting: "Mama",
     title: "Smart Fridge",
     subtitle: "Rencanakan 5 menu MPASI besok berdasarkan bahan kulkas Anda dalam hitungan detik. Tanpa pusing scrolling resep media sosial.",
-    fridgeHeader: "Isi Kulkas Saya",
+    
+    /* Hero Section Copywriting */
+    heroHeadline: "Siapkan MPASI Padat Nutrisi di Waktu Subuh, Tanpa Bingung.",
+    heroSubheadline: "Optimalkan sisa bahan di kulkas secara instan. Dirancang khusus sesuai usia dan tahap tumbuh kembang si kecil.",
+    heroPrimaryCTA: "Buat Rekomendasi Menu Subuh Ini",
+    heroSecondaryCTA: "Periksa Isi Kulkas",
+    
+    /* Feature/Dashboard Components */
+    ageSelectorTitle: "Pilih Kelompok Usia Bayi",
+    activeInventoryLabel: "Stok Bahan Kulkas Tersedia",
+    aiOutputCardHeader: "Rekomendasi Menu Pintar Pagi Ini",
+    prepTimeBadge: "⏱️ 15 Menit Siap Saji",
+
+    fridgeHeader: "Stok Bahan Kulkas Tersedia",
     fridgeEmpty: "Kulkas kosong. Tambahkan bahan makanan di bawah...",
     fridgePlaceholder: "Ketik bahan kulkas (contoh: Dada Ayam, Wortel)...",
     suggestHeader: "Cepat tambah:",
-    btnGenerate: "Rencanakan Menu MPASI",
+    btnGenerate: "Buat Rekomendasi Menu Subuh Ini",
     btnGenerating: "AI sedang menyusun resep...",
     btnRegenerate: "Rencanakan Ulang Menu",
     matrixHeader: "Rencana Menu 5 Kali Makan Besok",
@@ -157,11 +170,24 @@ const TRANSLATIONS = {
     greeting: "Mama",
     title: "Smart Fridge",
     subtitle: "Plan 5 infant meals for tomorrow based on your fridge ingredients instantly. Stop scrolling social media for ideas.",
-    fridgeHeader: "My Fridge Ingredients",
+    
+    /* Hero Section Copywriting */
+    heroHeadline: "Nutritious MPASI, Made Effortless at Dawn.",
+    heroSubheadline: "Optimize your fridge ingredients instantly. Tailored precisely to your baby’s age and developmental stage.",
+    heroPrimaryCTA: "Generate Today's Dawn Recipe",
+    heroSecondaryCTA: "Check Fridge Inventory",
+
+    /* Feature/Dashboard Components */
+    ageSelectorTitle: "Select Baby's Age Group",
+    activeInventoryLabel: "Current Fridge Stock",
+    aiOutputCardHeader: "Your Morning Smart Recipe",
+    prepTimeBadge: "⏱️ 15-Min Quick Prep",
+
+    fridgeHeader: "Current Fridge Stock",
     fridgeEmpty: "No ingredients yet. Add ingredients below...",
     fridgePlaceholder: "Type ingredient, then press Enter...",
     suggestHeader: "Quick add:",
-    btnGenerate: "Generate Meal Plan",
+    btnGenerate: "Generate Today's Dawn Recipe",
     btnGenerating: "AI is planning...",
     btnRegenerate: "Re-generate Meal Plan",
     matrixHeader: "5-Meal Daily Matrix",
@@ -319,7 +345,11 @@ function MealCard({
   return (
     <div
       className={`meal-card animate-fade-up ${delayClass}`}
-      style={isBreakfast ? { border: "1.5px solid rgba(255,107,90,0.3)", boxShadow: "0 8px 24px rgba(255,107,90,0.06)" } : {}}
+      style={{
+        background: "var(--bg-elevated)",
+        borderColor: "rgba(143, 160, 138, 0.35)",
+        boxShadow: "var(--shadow-card)"
+      }}
     >
       {/* Card Header */}
       <div className="flex items-center justify-between mb-3.5">
@@ -880,41 +910,61 @@ export default function HomePage() {
         {/* ─── HOME TAB ────────────────────────────────────────────────────────── */}
         {activeNav === "home" && (
           <div className="max-w-6xl mx-auto">
-            <header className="px-6 pt-8 pb-5 animate-fade-in md:px-0 md:pt-6 md:pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold tracking-widest uppercase mb-1"
-                    style={{ color: "var(--text-muted)", fontFamily: "var(--font-display)" }}>
-                    {greeting}, {t.greeting} {childName} 👋
-                  </p>
-                  <h1 className="text-2xl font-extrabold leading-tight"
-                    style={{ fontFamily: "var(--font-display)" }}>
-                    <span className="text-gradient-teal">{t.title}</span>
-                    <br />
-                    <span style={{ color: "var(--text-primary)" }} className="md:hidden">MPASI AI</span>
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2 md:hidden">
-                  <button
-                    onClick={toggleLanguage}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
-                    style={{
-                      background: "var(--bg-surface)",
-                      border: "1.5px solid var(--border-default)",
-                      color: "var(--text-secondary)"
-                    }}
-                  >
-                    {lang === "id" ? "🇮🇩 ID" : "🇬🇧 EN"}
-                  </button>
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-                    style={{ background: "var(--color-brand-primary)", boxShadow: "var(--shadow-coral)" }}>
-                    <span className="text-xl">👶</span>
-                  </div>
+            <header className="px-6 pt-10 pb-8 animate-fade-in md:px-0 md:pt-12 md:pb-10 max-w-2xl">
+              <div className="flex justify-between items-center mb-6 md:hidden">
+                <button
+                  onClick={toggleLanguage}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer border"
+                  style={{
+                    background: "var(--bg-surface)",
+                    borderColor: "var(--border-default)",
+                    color: "var(--text-secondary)"
+                  }}
+                >
+                  {lang === "id" ? "🇮🇩 ID" : "🇬🇧 EN"}
+                </button>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center border bg-surface"
+                  style={{ borderColor: "var(--border-default)" }}>
+                  <span className="text-lg">👶</span>
                 </div>
               </div>
-              <p className="mt-3.5 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {t.subtitle}
-              </p>
+
+              <div>
+                <p className="text-xs font-bold tracking-widest uppercase mb-3"
+                  style={{ color: "var(--color-brand-primary)", fontFamily: "var(--font-body)" }}>
+                  🌅 {greeting}, {t.greeting} {childName}
+                </p>
+                <h1 className="text-3xl md:text-4.5xl font-bold leading-tight tracking-tight mb-4"
+                  style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)", letterSpacing: "-0.015em" }}>
+                  {t.heroHeadline}
+                </h1>
+                <p className="text-base md:text-lg mb-6 leading-relaxed"
+                  style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: "1.6" }}>
+                  {t.heroSubheadline}
+                </p>
+                <div className="flex flex-wrap gap-3.5">
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isLoading || ingredients.length === 0}
+                    className="btn-primary w-auto"
+                    style={{ padding: "0.85rem 1.75rem", fontSize: "0.88rem" }}
+                  >
+                    {t.heroPrimaryCTA}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const fridgeSec = document.getElementById("fridge-inventory-section");
+                      if (fridgeSec) {
+                        fridgeSec.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="btn-secondary w-auto"
+                    style={{ padding: "0.85rem 1.75rem", fontSize: "0.88rem" }}
+                  >
+                    {t.heroSecondaryCTA}
+                  </button>
+                </div>
+              </div>
             </header>
 
             <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 md:gap-y-0 md:items-start">
@@ -940,8 +990,8 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Fridge Inventory */}
-              <section className="px-6 mb-8 animate-fade-up stagger-2 col-span-12 md:col-span-5 md:order-1 md:row-span-3 md:px-0">
+              {/* Fridge Inventory & Age Tracker Card */}
+              <section id="fridge-inventory-section" className="px-6 mb-8 animate-fade-up stagger-2 col-span-12 md:col-span-5 md:order-1 md:row-span-3 md:px-0">
                 <div className="flex items-center gap-3 mb-4.5">
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center"
                     style={{ background: "var(--bg-elevated)", color: "var(--color-brand-primary)" }}>
@@ -949,55 +999,150 @@ export default function HomePage() {
                   </div>
                   <h2 className="text-base font-bold"
                     style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
-                    {t.fridgeHeader}
+                    {lang === "id" ? "Stok Kulkas & Usia Bayi" : "Fridge Stock & Baby Age"}
                   </h2>
-                  {ingredients.length > 0 && (
-                    <span className="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full"
-                      style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", border: "1.5px solid var(--border-default)" }}>
-                      {ingredients.length} {lang === "id" ? "bahan" : "items"}
-                    </span>
-                  )}
                 </div>
 
-                <div className="rounded-2xl p-6"
-                  style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", boxShadow: "var(--shadow-card)" }}>
-                  <div className="flex flex-wrap gap-2.5 min-h-[40px] mb-4.5">
-                    {ingredients.map((ing) => (
-                      <span key={ing} className="tag-pill group">
-                        {ing}
-                        <button id={`remove-${ing}`} onClick={() => removeIngredient(ing)}
-                          className="ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity hover:text-red-400 cursor-pointer"
-                          aria-label={`Hapus ${ing}`}>
-                          <IconClose size={11} />
-                        </button>
-                      </span>
-                    ))}
-                     {ingredients.length === 0 && (
-                      <p className="text-sm self-center" style={{ color: "var(--text-muted)" }}>
-                        {t.fridgeEmpty}
-                      </p>
-                    )}
+                <div className="rounded-2xl p-6 space-y-6"
+                  style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", boxShadow: "var(--shadow-card)" }}>
+                  
+                  {/* Subsection 1: Baby Age Tracker */}
+                  <div className="space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-widest"
+                      style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
+                      👶 {lang === "id" ? "Pilih Kelompok Usia Bayi" : "Select Baby's Age Group"}
+                    </p>
+                    
+                    {/* Name & Age Inputs */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
+                          {lang === "id" ? "Nama Anak" : "Child Name"}
+                        </label>
+                        <input
+                          type="text"
+                          className="input-field text-xs py-2 px-3"
+                          value={childName}
+                          onChange={(e) => {
+                            setChildName(e.target.value);
+                            saveProfileData(e.target.value, allergies, childAgeMonths);
+                          }}
+                          placeholder="Adek"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-[10px] font-semibold uppercase tracking-wider block mb-1" style={{ color: "var(--text-muted)" }}>
+                          {lang === "id" ? "Usia (Bulan)" : "Age (Months)"}
+                        </label>
+                        <input
+                          type="number"
+                          min="6"
+                          max="36"
+                          className="input-field text-xs py-2 px-3"
+                          value={childAgeMonths}
+                          onChange={(e) => {
+                            const val = Math.max(6, Math.min(36, Number(e.target.value)));
+                            setChildAgeMonths(val);
+                            saveProfileData(childName, allergies, val);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Age Group Badges (interactive!) */}
+                    <div className="flex gap-2 pt-1">
+                      {[
+                        { min: 6,  max: 8,  label: lang === "id" ? "6-8 Bln" : "6-8 M",  bg: "rgba(143,160,138,0.15)", txt: "#4E5A4B" },
+                        { min: 9,  max: 11, label: lang === "id" ? "9-11 Bln" : "9-11 M", bg: "rgba(245,158,11,0.08)", txt: "#b45309" },
+                        { min: 12, max: 36, label: lang === "id" ? "12+ Bln" : "12m+",    bg: "rgba(99,102,241,0.08)", txt: "#4338ca" },
+                      ].map((grp) => {
+                        const isActive = childAgeMonths >= grp.min && childAgeMonths <= grp.max;
+                        return (
+                          <button
+                            key={grp.label}
+                            onClick={() => {
+                              setChildAgeMonths(grp.min);
+                              saveProfileData(childName, allergies, grp.min);
+                            }}
+                            className="flex-1 py-1.5 px-2 rounded-full text-[10px] font-bold transition-all cursor-pointer text-center border"
+                            style={{
+                              background: isActive ? grp.bg : "var(--bg-elevated)",
+                              color: isActive ? grp.txt : "var(--text-muted)",
+                              borderColor: isActive ? grp.txt : "var(--border-default)"
+                            }}
+                          >
+                            {grp.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Texture guidance info text */}
+                    <div className="text-[11px] font-semibold px-3 py-2 rounded-xl text-center leading-relaxed"
+                      style={{
+                        background: "var(--bg-elevated)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border-default)"
+                      }}>
+                      {childAgeMonths <= 8 
+                        ? t.texturePuree
+                        : childAgeMonths <= 11 
+                        ? t.textureMashed
+                        : t.textureFamily
+                      }
+                    </div>
                   </div>
 
-                  <div className="flex gap-3.5">
-                    <input
-                      id="ingredient-input"
-                      type="text"
-                      className="input-field text-sm flex-1"
-                      placeholder={t.fridgePlaceholder}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={handleInputKeyDown}
-                    />
-                    <button
-                      id="add-ingredient-btn"
-                      onClick={() => addIngredient(inputValue)}
-                      disabled={!inputValue.trim()}
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 disabled:opacity-30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                      style={{ background: "var(--gradient-brand)", color: "white" }}>
-                      <IconPlus size={18} />
-                    </button>
+                  {/* Horizontal Divider */}
+                  <div className="h-px" style={{ background: "var(--border-default)" }} />
+
+                  {/* Subsection 2: Fridge Stock */}
+                  <div className="space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-widest"
+                      style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
+                      🥦 {lang === "id" ? "Stok Bahan Kulkas Tersedia" : "Current Fridge Stock"}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2.5 min-h-[40px]">
+                      {ingredients.map((ing) => (
+                        <span key={ing} className="tag-pill group">
+                          {ing}
+                          <button id={`remove-${ing}`} onClick={() => removeIngredient(ing)}
+                            className="ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity hover:text-red-400 cursor-pointer"
+                            aria-label={`Hapus ${ing}`}>
+                            <IconClose size={11} />
+                          </button>
+                        </span>
+                      ))}
+                       {ingredients.length === 0 && (
+                        <p className="text-xs self-center" style={{ color: "var(--text-muted)" }}>
+                          {t.fridgeEmpty}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        id="ingredient-input"
+                        type="text"
+                        className="input-field text-xs flex-1 py-2 px-3"
+                        placeholder={t.fridgePlaceholder}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={handleInputKeyDown}
+                      />
+                      <button
+                        id="add-ingredient-btn"
+                        onClick={() => addIngredient(inputValue)}
+                        disabled={!inputValue.trim()}
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                        style={{ background: "var(--color-brand-primary)", color: "white" }}>
+                        <IconPlus size={16} />
+                      </button>
+                    </div>
                   </div>
+
                 </div>
 
                 {suggestionsToShow.length > 0 && (
@@ -1006,13 +1151,13 @@ export default function HomePage() {
                       style={{ color: "var(--text-muted)" }}>
                       {t.suggestHeader}
                     </p>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-2">
                       {suggestionsToShow.map((s) => (
                         <button id={`suggest-${s}`} key={s} onClick={() => addIngredient(s)}
-                          className="text-xs px-3 py-1.5 rounded-full transition-all active:scale-95 cursor-pointer"
+                          className="text-[11px] px-3 py-1 rounded-full transition-all active:scale-95 cursor-pointer"
                           style={{
                             background: "var(--bg-surface)",
-                            border: "1.5px solid var(--border-default)",
+                            border: "1px solid var(--border-default)",
                             color: "var(--text-secondary)",
                           }}>
                           + {s}
