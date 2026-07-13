@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { MealMatrix, MealEntry } from "./api/generate-meals/route";
 import { supabase } from "../lib/supabase";
 
@@ -574,6 +574,8 @@ function MealCard({
 }
 
 /* ─── Main Page ─────────────────────────── */
+const generateRandomId = () => Math.random().toString(36).substring(7);
+
 export default function HomePage() {
   const [lang, setLang] = useState<"id" | "en">("id");
   const [activeNav, setActiveNav] = useState<"home" | "favorites" | "settings">("home");
@@ -816,7 +818,7 @@ export default function HomePage() {
 
   async function handleConfirmSaveToFolder(folderId: string) {
     if (!selectedMealForSave) return;
-    const randomId = Math.random().toString(36).substring(7);
+    const randomId = generateRandomId();
     const newFav = {
       id: randomId,
       meal: selectedMealForSave,
@@ -950,8 +952,8 @@ export default function HomePage() {
         localStorage.setItem("mpasi_history", JSON.stringify(updated));
         return updated;
       });
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
