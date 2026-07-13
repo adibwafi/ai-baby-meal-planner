@@ -93,7 +93,7 @@ const IconTikTok = ({ size = 16 }) => (
 /* ─── Global Translation Dictionary ────────── */
 const TRANSLATIONS = {
   id: {
-    greeting: "Mama",
+    greeting: "Ibu",
     title: "Smart Fridge",
     subtitle: "Rencanakan 5 menu MPASI besok berdasarkan bahan kulkas Anda dalam hitungan detik. Tanpa pusing scrolling resep media sosial.",
     
@@ -167,7 +167,7 @@ const TRANSLATIONS = {
     pantryStaples: "ditambah bahan dapur dasar secara otomatis."
   },
   en: {
-    greeting: "Mama",
+    greeting: "Mom",
     title: "Smart Fridge",
     subtitle: "Plan 5 infant meals for tomorrow based on your fridge ingredients instantly. Stop scrolling social media for ideas.",
     
@@ -504,7 +504,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
 
   /* ─── User Profile & Settings State ────────── */
-  const [childName, setChildName] = useState("Adek");
+  const [childName, setChildName] = useState("Adik");
   const [childAgeMonths, setChildAgeMonths] = useState<number | "">(8);
   const [allergies, setAllergies] = useState<string[]>([]);
   const [newAllergyInput, setNewAllergyInput] = useState("");
@@ -909,7 +909,7 @@ export default function HomePage() {
             </button>
             <div className="text-xs font-bold px-3 py-1.5 rounded-xl border"
               style={{ background: "var(--bg-elevated)", borderColor: "var(--border-default)" }}>
-              Mama {childName}
+              {t.greeting} {childName}
             </div>
           </div>
         </div>
@@ -1037,7 +1037,7 @@ export default function HomePage() {
                             setChildName(e.target.value);
                             saveProfileData(e.target.value, allergies, childAgeMonths);
                           }}
-                          placeholder="Adek"
+                          placeholder="Adik"
                         />
                       </div>
                       
@@ -1455,7 +1455,7 @@ export default function HomePage() {
                         setChildName(e.target.value);
                         saveProfileData(e.target.value, allergies, childAgeMonths);
                       }}
-                      placeholder={lang === "id" ? "Contoh: Adek" : "Example: Kiddo"}
+                      placeholder={lang === "id" ? "Contoh: Adik" : "Example: Kiddo"}
                     />
                   </div>
 
