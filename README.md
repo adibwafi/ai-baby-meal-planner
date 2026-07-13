@@ -1,52 +1,55 @@
-# 👶 Smart Fridge MPASI Optimizer
+# 👶 Smart Fridge Baby Food Planner & Nutrition Optimizer
 
-Smart Fridge MPASI Optimizer adalah aplikasi PWA (Progressive Web App) mobile-first yang dirancang khusus untuk membantu ibu bekerja yang memiliki waktu terbatas (30 menit di pagi hari) dalam merencanakan menu MPASI (Makanan Pendamping ASI) 5 kali sehari untuk anak balita usia 16 bulan.
+A mobile-first Progressive Web App (PWA) designed to help parents plan nutrient-dense complementary feeding (weaning) menus in seconds using fridge inventory and AI. 
 
-Aplikasi ini dibangun menggunakan arsitektur **100% Free Tier** untuk efisiensi biaya maksimal, dengan integrasi pencarian visual TikTok untuk mempermudah Mama melihat video tutorial memasak secara instan tanpa perlu berselancar manual.
-
----
-
-## 🚀 Fitur Utama
-
-1. **Dashboard Inventory Kulkas**: Input tag dinamis cepat dengan saran bahan makanan populer sekali klik untuk memantau isi kulkas Mama.
-2. **Matrix 5 Menu MPASI Harian (Groq AI)**: Menghasilkan rencana 5 menu lengkap (Sarapan, Selingan Pagi, Makan Siang, Selingan Sore, Makan Malam) yang dirancang oleh ahli nutrisi anak virtual.
-3. **Pencarian Video Tutorial TikTok Dinamis**: Tombol shortcut di setiap resep yang otomatis mencarikan video tutorial masak di TikTok sesuai nama menu rekomendasi AI.
-4. **Koleksi Folder Favorit (Khas TikTok)**: Mengelompokkan resep favorit Mama ke dalam folder-folder kustom seperti "Resep Cepat Pagi", "Anti GTM", atau folder buatan sendiri.
-5. **Manajemen Profil Anak & Alergi**: Menghindari bahan makanan alergen secara dinamis. AI tidak akan pernah merekomendasikan bahan yang terdaftar sebagai alergen anak.
-6. **Sinkronisasi Supabase dengan Fallback Offline**: Sinkronisasi data cloud real-time ke Supabase PostgreSQL, dengan mode fallback otomatis ke `localStorage` (offline/lokal) jika Supabase belum dikonfigurasikan.
+Built with a **100% Free-Tier Architecture** for maximum cost efficiency, featuring offline database fallback, automated portion-size calculations, developmental milestone tracking, dynamic shopping list generation, and visual TikTok search integration for instant video recipes.
 
 ---
 
-## 🛠️ Stack Teknologi (100% Free Tier)
+## 🌟 Key Features
 
-* **Framework**: Next.js App Router (React, Tailwind CSS)
-* **PWA Engine**: Serwist (Service Worker precaching & offline support)
-* **AI Engine**: Groq API LLaMA 3.3 70B (Sangat Cepat & Free Tier Kuota Besar)
+1. **AI-Powered 5-Meal Daily Matrix**: Generates a tailored daily meal plan (Breakfast, AM Snack, Lunch, PM Snack, Dinner) using LLaMA 3.3 70B via Groq API.
+2. **Interactive Fridge Inventory**: A tag-based inventory system with quick-add popular ingredients to track available fresh food.
+3. **Automated Age-Appropriate Portions**: Automatically calculates and displays recommended serving portions based on the infant's age (e.g., spoonfuls for 6–8 months, volume for 12+ months).
+4. **Developmental Milestone Tracker**: Displays localized motor skill progress and pediatric nutrition tips dynamically matched to the child’s age bracket.
+5. **Smart Shopping List Generator**: Computes a missing ingredients list by comparing the AI's recipe requirements against the active fridge inventory, complete with WhatsApp sharing and clipboard copying.
+6. **7-Day Menu History & Local Cache**: Automatically persists the last 7 generated meal matrices to local storage, allowing instant load without calling the API.
+7. **Allergen & Safety Guardrails**: Hard constraints implemented at both prompt and routing levels to ensure allergen ingredients are never recommended.
+8. **Supabase Cloud Sync with Offline Fallback**: Real-time cloud sync to Supabase PostgreSQL, automatically falling back to secure browser `localStorage` if database environment variables are absent.
+9. **Visual Tutorial Search (TikTok integration)**: Dynamic search helper that redirects the user to recipe video tutorials matching the generated meal names.
+
+---
+
+## 🛠️ Tech Stack (100% Free Tier)
+
+* **Frontend**: Next.js App Router (React, Tailwind CSS, TypeScript)
+* **PWA Engine**: Serwist (Service Worker precaching, installable app shell, offline runtime support)
+* **AI Orchestration**: Groq SDK + LLaMA 3.3 70B / LLaMA 4 Scout (Low latency, high token throughput)
 * **Database**: Supabase PostgreSQL (Free Tier 500MB)
-* **Deployment**: Vercel (Hobby Tier Free)
+* **Deployment**: Vercel (Hobby Tier)
 
 ---
 
-## 📋 Skema Database (Supabase)
+## 📊 Database Schema (Supabase DDL)
 
-Salin dan jalankan script SQL berikut di menu **SQL Editor** pada Dashboard Supabase Anda sebelum menghubungkan aplikasi:
+To set up the cloud sync feature, run the following SQL script in your Supabase **SQL Editor**:
 
 ```sql
--- Tabel untuk menyimpan bahan kulkas aktif Mama
+-- 1. Table to store active fridge ingredients
 CREATE TABLE fridge_inventory (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT UNIQUE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Tabel untuk menyimpan folder koleksi favorit Mama
+-- 2. Table to store custom recipe folder collections
 CREATE TABLE folders (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Tabel untuk menyimpan resep favorit Mama beserta relasi kategorinya
+-- 3. Table to store favorited recipes and their category folder relations
 CREATE TABLE favorite_meals (
   id TEXT PRIMARY KEY,
   folder_id TEXT DEFAULT 'default' REFERENCES folders(id) ON DELETE SET DEFAULT,
@@ -59,62 +62,62 @@ CREATE TABLE favorite_meals (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Insert folder bawaan
+-- Pre-populate default folders
 INSERT INTO folders (id, name) VALUES 
-  ('default', 'Semua Favorit'),
-  ('fast', 'Sarapan Cepat'),
-  ('nogtm', 'Anti GTM')
+  ('default', 'All Favorites'),
+  ('fast', 'Quick Breakfast'),
+  ('nogtm', 'Anti-GTM / Appetite Booster')
 ON CONFLICT (id) DO NOTHING;
 ```
 
 ---
 
-## ⚙️ Panduan Instalasi Lokal
+## ⚙️ Local Installation Guide
 
-### 1. Klon Repositori
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/adibwafi/smart-fridge-mpasi-optimizer.git
-cd smart-fridge-mpasi-optimizer
+git clone https://github.com/adibwafi/smart-fridge-baby-food-optimizer.git
+cd smart-fridge-baby-food-optimizer
 ```
 
-### 2. Instal Dependensi
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Konfigurasi Variabel Lingkungan (`.env.local`)
-Buat file bernama `.env.local` di direktori root proyek dan masukkan key Anda:
+### 3. Configure Environment Variables (`.env.local`)
+Create a file named `.env.local` in the root directory and add your API keys:
 
 ```env
-# API Key dari console.groq.com (Gratis)
+# Groq Console API Key (Free Tier: console.groq.com)
 GROQ_API_KEY=gsk_xxx...
 
-# Opsional: Jika ingin menggunakan sinkronisasi Cloud Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://proyek_anda.supabase.co
+# Optional: Supabase cloud sync keys
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1...
 ```
 
-*Catatan: Jika variabel Supabase di atas tidak diisi, aplikasi akan tetap berjalan normal menggunakan mode penyimpanan Local/Offline.*
+*Note: If Supabase keys are left blank, the application will automatically enter Local Fallback Mode, storing all data offline in the browser's localStorage.*
 
-### 4. Jalankan Server Pengembangan
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
 
-Buka **[http://localhost:3000](http://localhost:3000)** di browser Anda.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 📱 Panduan PWA (Pasang di Handphone)
+## 📱 Mobile Installation (PWA)
 
-1. Jalankan server lokal atau deploy ke Vercel (pastikan menggunakan protokol HTTPS).
-2. Buka web tersebut di browser Handphone Anda (Safari untuk iOS, Chrome untuk Android).
-3. Klik tombol **Bagikan/Share** (iOS) atau **Menu Titik Tiga** (Android).
-4. Pilih opsi **"Tambah ke Layar Utama" / "Add to Home Screen"**.
-5. Aplikasi "Smart Fridge MPASI Optimizer" akan terpasang di handphone Anda layaknya aplikasi native dengan dukungan mode offline dan loading instan!
+1. Access your deployed instance (must use HTTPS protocol).
+2. Open the page in your mobile browser (Safari for iOS, Chrome for Android).
+3. Tap the **Share** button (iOS) or **Three Dots Menu** (Android).
+4. Select **"Add to Home Screen"**.
+5. The app installs directly on your device, operating like a native application with offline support and instantaneous loading times.
 
 ---
 
-## 📄 Lisensi
+## 📄 License
 
-Proyek ini dilisensikan di bawah lisensi MIT.
+This project is licensed under the MIT License.
