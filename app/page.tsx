@@ -601,10 +601,10 @@ export default function HomePage() {
   }, [isSupabaseConfigured]);
 
   const saveProfileData = (name: string, allergyList: string[], ageMonths: number | "") => {
-     localStorage.setItem("mpasi_childName", name);
-     localStorage.setItem("mpasi_allergies", JSON.stringify(allergyList));
-     const ageVal = ageMonths === "" ? 8 : Math.max(6, Math.min(36, ageMonths));
-     localStorage.setItem("mpasi_childAgeMonths", String(ageVal));
+    localStorage.setItem("mpasi_childName", name);
+    localStorage.setItem("mpasi_allergies", JSON.stringify(allergyList));
+    const ageVal = ageMonths === "" ? 8 : Math.max(6, Math.min(24, ageMonths));
+    localStorage.setItem("mpasi_childAgeMonths", String(ageVal));
   };
 
   const toggleLanguage = () => {
@@ -796,7 +796,7 @@ export default function HomePage() {
     setError(null);
 
     try {
-      const ageVal = childAgeMonths === "" ? 8 : Math.max(6, Math.min(36, Number(childAgeMonths)));
+      const ageVal = childAgeMonths === "" ? 8 : Math.max(6, Math.min(24, Number(childAgeMonths)));
       setChildAgeMonths(ageVal);
       saveProfileData(childName, allergies, ageVal);
 
@@ -1048,7 +1048,7 @@ export default function HomePage() {
                         <input
                           type="number"
                           min="6"
-                          max="36"
+                          max="24"
                           className="input-field text-xs py-2 px-3"
                           value={childAgeMonths}
                           onChange={(e) => {
@@ -1057,7 +1057,7 @@ export default function HomePage() {
                           }}
                           onBlur={(e) => {
                             const num = Number(e.target.value);
-                            const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(36, num));
+                            const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(24, num));
                             setChildAgeMonths(clamped);
                             saveProfileData(childName, allergies, clamped);
                           }}
@@ -1070,7 +1070,7 @@ export default function HomePage() {
                       {[
                         { min: 6,  max: 8,  label: lang === "id" ? "6-8 Bln" : "6-8 M",  bg: "rgba(143,160,138,0.15)", txt: "#4E5A4B" },
                         { min: 9,  max: 11, label: lang === "id" ? "9-11 Bln" : "9-11 M", bg: "rgba(245,158,11,0.08)", txt: "#b45309" },
-                        { min: 12, max: 36, label: lang === "id" ? "12+ Bln" : "12m+",    bg: "rgba(99,102,241,0.08)", txt: "#4338ca" },
+                        { min: 12, max: 24, label: lang === "id" ? "12-24 Bln" : "12-24 M", bg: "rgba(99,102,241,0.08)", txt: "#4338ca" },
                       ].map((grp) => {
                         const isActive = ageNum >= grp.min && ageNum <= grp.max;
                         return (
@@ -1468,7 +1468,7 @@ export default function HomePage() {
                       <input
                         type="number"
                         min="6"
-                        max="36"
+                        max="24"
                         className="input-field text-sm w-full"
                         value={childAgeMonths}
                         onChange={(e) => {
@@ -1477,11 +1477,11 @@ export default function HomePage() {
                         }}
                         onBlur={(e) => {
                           const num = Number(e.target.value);
-                          const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(36, num));
+                          const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(24, num));
                           setChildAgeMonths(clamped);
                           saveProfileData(childName, allergies, clamped);
                         }}
-                        placeholder={lang === "id" ? "Masukkan usia dalam bulan (6-36)" : "Enter age in months (6-36)"}
+                        placeholder={lang === "id" ? "Masukkan usia dalam bulan (6-24)" : "Enter age in months (6-24)"}
                       />
                       <div className="text-[11px] font-semibold px-3 py-2 rounded-xl text-center"
                         style={{
