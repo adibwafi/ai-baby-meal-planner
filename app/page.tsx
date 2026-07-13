@@ -166,7 +166,13 @@ const TRANSLATIONS = {
     textureFamily: "🍽️ Rekomendasi Tekstur: Makanan Keluarga Cincang (Usia 12+ bulan)",
     pantryStaples: "ditambah bahan dapur dasar secara otomatis.",
     portionLabel: "Porsi",
-    milestoneTitle: "Tahap Tumbuh Kembang"
+    milestoneTitle: "Tahap Tumbuh Kembang",
+    shoppingListTitle: "Daftar Belanja",
+    shoppingListDesc: "Bahan berikut dibutuhkan untuk besok namun belum ada di kulkas:",
+    shoppingListEmpty: "Semua bahan sudah tersedia di kulkas! 🎉",
+    shoppingListCopy: "Salin Daftar",
+    shoppingListCopied: "Tersalin! ✓",
+    shoppingListShare: "Bagikan ke WhatsApp"
   },
   en: {
     greeting: "Mom",
@@ -242,7 +248,13 @@ const TRANSLATIONS = {
     textureFamily: "Recommended Texture: Chopped Family Food (12+ months)",
     pantryStaples: "plus basic pantry staples automatically.",
     portionLabel: "Serving",
-    milestoneTitle: "Development Milestones"
+    milestoneTitle: "Development Milestones",
+    shoppingListTitle: "Shopping List",
+    shoppingListDesc: "These ingredients are needed for tomorrow but not in your fridge:",
+    shoppingListEmpty: "All ingredients are already in your fridge! 🎉",
+    shoppingListCopy: "Copy List",
+    shoppingListCopied: "Copied! ✓",
+    shoppingListShare: "Share via WhatsApp"
   }
 };
 
@@ -582,9 +594,37 @@ export default function HomePage() {
   const [activeCookingStep, setActiveCookingStep] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  /* ─── Shopping State ──────────────── */
+  const [copiedShopping, setCopiedShopping] = useState(false);
+
   const ageNum = typeof childAgeMonths === "number" ? childAgeMonths : 8;
 
   const t = TRANSLATIONS[lang];
+
+  /* ─── Computed: Shopping List ──────────────── */
+  const shoppingList = useMemo(() => {
+    if (!matrix) return [];
+    const allIngredients = MEAL_SLOTS.flatMap((slot) => matrix[slot.id]?.ingredients ?? []);
+    const normalize = (s: string) =>
+      s.toLowerCase()
+       .replace(/^\d[\d.,/\s]*\s*(g|gram|kg|ml|liter|l|buah|siung|lembar|sdm|sdt|batang|helai|cup|mangkuk|butir|potong|iris|genggam|biji|ekor|fillet)\b\s*/i, "")
+       .replace(/^\d+\s*[-–]\s*\d+\s*/, "")
+       .trim();
+    const fridgeSet = new Set(ingredients.map(normalize));
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const raw of allIngredients) {
+      const key = normalize(raw);
+      if (key.length < 2) continue;
+      if (seen.has(key)) continue;
+      const inFridge = [...fridgeSet].some((f) => f.includes(key) || key.includes(f));
+      if (!inFridge) {
+        seen.add(key);
+        result.push(raw);
+      }
+    }
+    return result.slice(0, 20);
+  }, [matrix, ingredients]);
 
   // Sync state helpers checking Supabase environment variables status
   const isSupabaseConfigured = 
@@ -1347,6 +1387,65 @@ export default function HomePage() {
                   </div>
                 )}
               </section>
+
+              {/* ── Shopping List Section ── */}
+              {matrix && (
+                <section className="px-6 pb-6 col-span-12 md:col-span-7 md:order-5 md:px-0 animate-fade-up">
+                  <div className="rounded-2xl p-5" style={{ background: "var(--bg-card)", border: "1px solid var(--border-default)", boxShadow: "var(--shadow-card)" }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🛒</span>
+                        <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
+                          {t.shoppingListTitle}
+                        </h2>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: shoppingList.length === 0 ? "rgba(16,185,129,0.08)" : "rgba(245,158,11,0.08)", color: shoppingList.length === 0 ? "var(--color-accent-green)" : "#b45309", border: "1px solid currentColor" }}>
+                        {shoppingList.length === 0 ? "✓ " + (lang === "id" ? "Lengkap" : "Complete") : `${shoppingList.length} ${lang === "id" ? "bahan" : "items"}`}
+                      </span>
+                    </div>
+
+                    {shoppingList.length === 0 ? (
+                      <p className="text-xs py-3 text-center" style={{ color: "var(--text-muted)" }}>{t.shoppingListEmpty}</p>
+                    ) : (
+                      <>
+                        <p className="text-[11px] mb-3" style={{ color: "var(--text-secondary)" }}>{t.shoppingListDesc}</p>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {shoppingList.map((item, i) => (
+                            <span key={i} className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                              style={{ background: "rgba(245,158,11,0.08)", color: "#92400e", border: "1px solid rgba(245,158,11,0.2)" }}>
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              const text = `🛒 ${t.shoppingListTitle}\n${shoppingList.map((i) => `• ${i}`).join("\n")}`;
+                              navigator.clipboard.writeText(text).then(() => {
+                                setCopiedShopping(true);
+                                setTimeout(() => setCopiedShopping(false), 2000);
+                              });
+                            }}
+                            className="flex-1 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer border"
+                            style={{ background: "var(--bg-elevated)", color: "var(--text-primary)", borderColor: "var(--border-default)" }}
+                          >
+                            {copiedShopping ? t.shoppingListCopied : t.shoppingListCopy}
+                          </button>
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(`🛒 ${t.shoppingListTitle} MPASI ${childName}\n${shoppingList.map((i) => `• ${i}`).join("\n")}`)}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="flex-1 py-2 rounded-xl text-xs font-bold text-center transition-all active:scale-95 cursor-pointer"
+                            style={{ background: "#25D366", color: "white" }}
+                          >
+                            {t.shoppingListShare}
+                          </a>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         )}
