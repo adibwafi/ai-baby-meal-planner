@@ -505,7 +505,7 @@ export default function HomePage() {
 
   /* ─── User Profile & Settings State ────────── */
   const [childName, setChildName] = useState("Adek");
-  const [childAgeMonths, setChildAgeMonths] = useState<number>(8);
+  const [childAgeMonths, setChildAgeMonths] = useState<number | "">(8);
   const [allergies, setAllergies] = useState<string[]>([]);
   const [newAllergyInput, setNewAllergyInput] = useState("");
 
@@ -526,6 +526,8 @@ export default function HomePage() {
   const [activeCookingSlot, setActiveCookingSlot] = useState<typeof MEAL_SLOTS[number] | null>(null);
   const [activeCookingStep, setActiveCookingStep] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+
+  const ageNum = typeof childAgeMonths === "number" ? childAgeMonths : 8;
 
   const t = TRANSLATIONS[lang];
 
@@ -598,10 +600,11 @@ export default function HomePage() {
     loadData();
   }, [isSupabaseConfigured]);
 
-  const saveProfileData = (name: string, allergyList: string[], ageMonths: number) => {
-    localStorage.setItem("mpasi_childName", name);
-    localStorage.setItem("mpasi_allergies", JSON.stringify(allergyList));
-    localStorage.setItem("mpasi_childAgeMonths", String(ageMonths));
+  const saveProfileData = (name: string, allergyList: string[], ageMonths: number | "") => {
+     localStorage.setItem("mpasi_childName", name);
+     localStorage.setItem("mpasi_allergies", JSON.stringify(allergyList));
+     const ageVal = ageMonths === "" ? 8 : Math.max(6, Math.min(36, ageMonths));
+     localStorage.setItem("mpasi_childAgeMonths", String(ageVal));
   };
 
   const toggleLanguage = () => {
@@ -793,6 +796,10 @@ export default function HomePage() {
     setError(null);
 
     try {
+      const ageVal = childAgeMonths === "" ? 8 : Math.max(6, Math.min(36, Number(childAgeMonths)));
+      setChildAgeMonths(ageVal);
+      saveProfileData(childName, allergies, ageVal);
+
       const response = await fetch("/api/generate-meals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -800,7 +807,7 @@ export default function HomePage() {
           ingredients,
           allergies,
           childName,
-          childAgeMonths
+          childAgeMonths: ageVal
         })
       });
 
@@ -1045,9 +1052,14 @@ export default function HomePage() {
                           className="input-field text-xs py-2 px-3"
                           value={childAgeMonths}
                           onChange={(e) => {
-                            const val = Math.max(6, Math.min(36, Number(e.target.value)));
-                            setChildAgeMonths(val);
-                            saveProfileData(childName, allergies, val);
+                            const raw = e.target.value;
+                            setChildAgeMonths(raw === "" ? "" : Number(raw));
+                          }}
+                          onBlur={(e) => {
+                            const num = Number(e.target.value);
+                            const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(36, num));
+                            setChildAgeMonths(clamped);
+                            saveProfileData(childName, allergies, clamped);
                           }}
                         />
                       </div>
@@ -1060,7 +1072,7 @@ export default function HomePage() {
                         { min: 9,  max: 11, label: lang === "id" ? "9-11 Bln" : "9-11 M", bg: "rgba(245,158,11,0.08)", txt: "#b45309" },
                         { min: 12, max: 36, label: lang === "id" ? "12+ Bln" : "12m+",    bg: "rgba(99,102,241,0.08)", txt: "#4338ca" },
                       ].map((grp) => {
-                        const isActive = childAgeMonths >= grp.min && childAgeMonths <= grp.max;
+                        const isActive = ageNum >= grp.min && ageNum <= grp.max;
                         return (
                           <button
                             key={grp.label}
@@ -1088,9 +1100,9 @@ export default function HomePage() {
                         color: "var(--text-secondary)",
                         border: "1px solid var(--border-default)"
                       }}>
-                      {childAgeMonths <= 8 
+                      {ageNum <= 8 
                         ? t.texturePuree
-                        : childAgeMonths <= 11 
+                        : ageNum <= 11 
                         ? t.textureMashed
                         : t.textureFamily
                       }
@@ -1460,21 +1472,26 @@ export default function HomePage() {
                         className="input-field text-sm w-full"
                         value={childAgeMonths}
                         onChange={(e) => {
-                          const val = Math.max(6, Math.min(36, Number(e.target.value)));
-                          setChildAgeMonths(val);
-                          saveProfileData(childName, allergies, val);
+                          const raw = e.target.value;
+                          setChildAgeMonths(raw === "" ? "" : Number(raw));
+                        }}
+                        onBlur={(e) => {
+                          const num = Number(e.target.value);
+                          const clamped = isNaN(num) || num === 0 ? 8 : Math.max(6, Math.min(36, num));
+                          setChildAgeMonths(clamped);
+                          saveProfileData(childName, allergies, clamped);
                         }}
                         placeholder={lang === "id" ? "Masukkan usia dalam bulan (6-36)" : "Enter age in months (6-36)"}
                       />
                       <div className="text-[11px] font-semibold px-3 py-2 rounded-xl text-center"
                         style={{
-                          background: childAgeMonths <= 8 ? "rgba(16, 185, 129, 0.08)" : childAgeMonths <= 11 ? "rgba(245, 158, 11, 0.08)" : "rgba(99, 102, 241, 0.08)",
-                          color: childAgeMonths <= 8 ? "#065f46" : childAgeMonths <= 11 ? "#b45309" : "#4338ca",
-                          border: childAgeMonths <= 8 ? "1px solid rgba(16, 185, 129, 0.2)" : childAgeMonths <= 11 ? "1px solid rgba(245, 158, 11, 0.2)" : "1px solid rgba(99, 102, 241, 0.2)"
+                          background: ageNum <= 8 ? "rgba(16, 185, 129, 0.08)" : ageNum <= 11 ? "rgba(245, 158, 11, 0.08)" : "rgba(99, 102, 241, 0.08)",
+                          color: ageNum <= 8 ? "#065f46" : ageNum <= 11 ? "#b45309" : "#4338ca",
+                          border: ageNum <= 8 ? "1px solid rgba(16, 185, 129, 0.2)" : ageNum <= 11 ? "1px solid rgba(245, 158, 11, 0.2)" : "1px solid rgba(99, 102, 241, 0.2)"
                         }}>
-                        {childAgeMonths <= 8 
+                        {ageNum <= 8 
                           ? t.texturePuree
-                          : childAgeMonths <= 11 
+                          : ageNum <= 11 
                           ? t.textureMashed
                           : t.textureFamily
                         }
