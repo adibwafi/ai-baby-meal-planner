@@ -164,7 +164,8 @@ const TRANSLATIONS = {
     texturePuree: "🥣 Rekomendasi Tekstur: Puree Halus / Saring (Usia 6-8 bulan)",
     textureMashed: "🥔 Rekomendasi Tekstur: Bubur Kasar / Lumat (Usia 9-11 bulan)",
     textureFamily: "🍽️ Rekomendasi Tekstur: Makanan Keluarga Cincang (Usia 12+ bulan)",
-    pantryStaples: "ditambah bahan dapur dasar secara otomatis."
+    pantryStaples: "ditambah bahan dapur dasar secara otomatis.",
+    portionLabel: "Porsi"
   },
   en: {
     greeting: "Mom",
@@ -238,7 +239,8 @@ const TRANSLATIONS = {
     texturePuree: "Recommended Texture: Smooth Puree / Strained (6-8 months)",
     textureMashed: "Recommended Texture: Lumpy / Mashed (9-11 months)",
     textureFamily: "Recommended Texture: Chopped Family Food (12+ months)",
-    pantryStaples: "plus basic pantry staples automatically."
+    pantryStaples: "plus basic pantry staples automatically.",
+    portionLabel: "Serving"
   }
 };
 
@@ -401,13 +403,24 @@ function MealCard({
       </p>
 
       {/* Nutrition highlight */}
-      <div className="flex items-start gap-2 mb-4 rounded-xl p-3"
+      <div className="flex items-start gap-2 mb-3 rounded-xl p-3"
         style={{ background: "var(--color-accent-green-bg)", border: "1.5px solid rgba(16,185,129,0.2)" }}>
         <span style={{ fontSize: "14px" }}>🌱</span>
         <p className="text-xs leading-relaxed font-bold" style={{ color: "var(--color-accent-green-txt)" }}>
           {meal.nutritionHighlight}
         </p>
       </div>
+
+      {/* Portion Size */}
+      {meal.portionSize && (
+        <div className="flex items-center gap-1.5 mb-3.5 px-1"
+          style={{ color: "var(--text-secondary)" }}>
+          <span className="text-sm">🥄</span>
+          <span className="text-[11px] font-semibold">
+            {t.portionLabel}: <span style={{ color: "var(--text-primary)" }}>{meal.portionSize}</span>
+          </span>
+        </div>
+      )}
 
       {/* Mulai Masak (Visual) */}
       <button
@@ -579,6 +592,7 @@ export default function HomePage() {
                 instructions: row.instructions,
                 cookingTime: row.cooking_time,
                 nutritionHighlight: row.nutrition_highlight || "",
+                portionSize: row.portion_size || "",
               }
             }));
             setFavorites(formatted);

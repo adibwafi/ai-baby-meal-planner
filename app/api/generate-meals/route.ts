@@ -9,6 +9,7 @@ export interface MealEntry {
   instructions: string[];
   cookingTime: number;
   nutritionHighlight: string;
+  portionSize: string;
 }
 
 export interface MealMatrix {
@@ -64,6 +65,7 @@ Each meal object must have these exact fields:
 - "instructions": string[] (step-by-step cooking instructions in Bahasa Indonesia, STRICTLY maximum 4 steps. Keep steps very short, clear, and direct. Start each step with a clear action verb like Potong, Rebus, Tumis, Kukus, Saring, Haluskan, or Sajikan)
 - "cookingTime": number (total prep + cook time in minutes as integer)
 - "nutritionHighlight": string (key nutritional benefit in Bahasa Indonesia, 1 sentence)
+- "portionSize": string (recommended serving size for this child's age in Bahasa Indonesia, e.g. "2-3 sdm" for 6-8 months, "½ mangkuk / 150ml" for 9-11 months, "175-250ml" for 12+ months)
 
 STRICT CONSTRAINTS:
 1. Breakfast "cookingTime" MUST be 30 minutes or less — hard limit for a working mother at 5:30 AM.
