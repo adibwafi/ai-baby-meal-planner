@@ -165,7 +165,8 @@ const TRANSLATIONS = {
     textureMashed: "🥔 Rekomendasi Tekstur: Bubur Kasar / Lumat (Usia 9-11 bulan)",
     textureFamily: "🍽️ Rekomendasi Tekstur: Makanan Keluarga Cincang (Usia 12+ bulan)",
     pantryStaples: "ditambah bahan dapur dasar secara otomatis.",
-    portionLabel: "Porsi"
+    portionLabel: "Porsi",
+    milestoneTitle: "Tahap Tumbuh Kembang"
   },
   en: {
     greeting: "Mom",
@@ -240,7 +241,8 @@ const TRANSLATIONS = {
     textureMashed: "Recommended Texture: Lumpy / Mashed (9-11 months)",
     textureFamily: "Recommended Texture: Chopped Family Food (12+ months)",
     pantryStaples: "plus basic pantry staples automatically.",
-    portionLabel: "Serving"
+    portionLabel: "Serving",
+    milestoneTitle: "Development Milestones"
   }
 };
 
@@ -258,6 +260,46 @@ const SUGGESTED_INGREDIENTS = [
   "Telur", "Dada Ayam", "Ikan Kakap", "Bayam", "Kentang",
   "Labu Kuning", "Pisang", "Alpukat", "Pepaya",
 ];
+
+/* ─── Milestone Data ────────────────────────── */
+const MILESTONE_DATA = {
+  "6-8": {
+    id: {
+      intro: "Si kecil mulai membutuhkan gizi tambahan selain ASI.",
+      skills: ["Mulai duduk dengan bantuan", "Meraih & menggenggam benda", "Tertarik melihat orang makan"],
+      tips: ["Perkenalkan 1 bahan baru setiap 3 hari", "Mulai dari 1-2 sdm, naikkan perlahan", "Hindari garam, gula, dan madu"],
+    },
+    en: {
+      intro: "Your baby is starting to need nutrients beyond breast milk.",
+      skills: ["Starting to sit with support", "Reaching & grasping objects", "Interested in watching others eat"],
+      tips: ["Introduce 1 new ingredient every 3 days", "Start with 1-2 tbsp, increase gradually", "Avoid salt, sugar, and honey"],
+    },
+  },
+  "9-11": {
+    id: {
+      intro: "Tahap finger foods dimulai — tekstur mulai lebih kasar.",
+      skills: ["Duduk tanpa bantuan", "Menggigit & mengunyah makanan lunak", "Memegang makanan sendiri"],
+      tips: ["Coba finger foods lunak (pisang, tahu kukus)", "Variasikan protein: ayam, ikan, telur, tahu", "Porsi 125–175ml per makan"],
+    },
+    en: {
+      intro: "Finger food stage begins — textures get lumpier.",
+      skills: ["Sitting without support", "Biting & chewing soft foods", "Self-feeding finger foods"],
+      tips: ["Offer soft finger foods (banana, steamed tofu)", "Vary proteins: chicken, fish, egg, tofu", "Portion: 125–175ml per meal"],
+    },
+  },
+  "12-24": {
+    id: {
+      intro: "Si kecil siap beralih ke makanan keluarga yang disesuaikan.",
+      skills: ["Berjalan & menjelajah aktif", "Menggunakan sendok dengan bantuan", "Ikut makan bersama keluarga"],
+      tips: ["Sajikan dalam potongan kecil & lunak", "Batasi garam & gula, hindari junk food", "Porsi 175–250ml per makan"],
+    },
+    en: {
+      intro: "Your toddler is ready for adapted family foods.",
+      skills: ["Walking & actively exploring", "Using a spoon with help", "Joining family meals"],
+      tips: ["Serve in small, soft pieces", "Limit salt & sugar, avoid junk food", "Portion: 175–250ml per meal"],
+    },
+  },
+};
 
 /* ─── Skeleton Card ──────────────────────── */
 function SkeletonCard() {
@@ -1173,6 +1215,28 @@ export default function HomePage() {
                   </div>
 
                 </div>
+
+                {/* ── Milestone Tumbuh Kembang Card ── */}
+                {(() => {
+                  const range: "6-8" | "9-11" | "12-24" = ageNum <= 8 ? "6-8" : ageNum <= 11 ? "9-11" : "12-24";
+                  const ms = MILESTONE_DATA[range][lang];
+                  return (
+                    <div className="mt-4 rounded-2xl p-4 animate-fade-up" style={{ background: "rgba(42,140,96,0.04)", border: "1.5px solid rgba(42,140,96,0.15)" }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: "var(--color-brand-primary)" }}>
+                        👶 {t.milestoneTitle} · {range} {lang === "id" ? "Bln" : "Mo"}
+                      </p>
+                      <p className="text-[11px] mb-2.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{ms.intro}</p>
+                      <div className="space-y-1">
+                        {ms.tips.map((tip, i) => (
+                          <div key={i} className="flex items-start gap-1.5 text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                            <span className="flex-shrink-0 font-bold mt-px" style={{ color: "var(--color-brand-primary)" }}>✓</span>
+                            <span>{tip}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {suggestionsToShow.length > 0 && (
                   <div className="mt-4">
