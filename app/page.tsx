@@ -172,7 +172,10 @@ const TRANSLATIONS = {
     shoppingListEmpty: "Semua bahan sudah tersedia di kulkas! 🎉",
     shoppingListCopy: "Salin Daftar",
     shoppingListCopied: "Tersalin! ✓",
-    shoppingListShare: "Bagikan ke WhatsApp"
+    shoppingListShare: "Bagikan ke WhatsApp",
+    historyTitle: "Riwayat Menu (7 Hari)",
+    historyEmpty: "Belum ada riwayat menu sebelumnya.",
+    historyLoad: "Muat Menu Ini"
   },
   en: {
     greeting: "Mom",
@@ -254,7 +257,10 @@ const TRANSLATIONS = {
     shoppingListEmpty: "All ingredients are already in your fridge! 🎉",
     shoppingListCopy: "Copy List",
     shoppingListCopied: "Copied! ✓",
-    shoppingListShare: "Share via WhatsApp"
+    shoppingListShare: "Share via WhatsApp",
+    historyTitle: "Menu History (7 Days)",
+    historyEmpty: "No previous menu history yet.",
+    historyLoad: "Load This Menu"
   }
 };
 
@@ -311,6 +317,13 @@ const MILESTONE_DATA = {
       tips: ["Serve in small, soft pieces", "Limit salt & sugar, avoid junk food", "Portion: 175–250ml per meal"],
     },
   },
+};
+
+/* ─── History Entry Type ─────────────────────── */
+type HistoryEntry = {
+  date: string;
+  matrix: MealMatrix;
+  ingredients: string[];
 };
 
 /* ─── Skeleton Card ──────────────────────── */
@@ -597,6 +610,10 @@ export default function HomePage() {
   /* ─── Shopping State ──────────────── */
   const [copiedShopping, setCopiedShopping] = useState(false);
 
+  /* ─── History State ──────────────── */
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
   const ageNum = typeof childAgeMonths === "number" ? childAgeMonths : 8;
 
   const t = TRANSLATIONS[lang];
@@ -646,6 +663,10 @@ export default function HomePage() {
 
       const storedAllergies = localStorage.getItem("mpasi_allergies");
       if (storedAllergies) setAllergies(JSON.parse(storedAllergies));
+
+      // History is always local regardless of Supabase
+      const storedHistory = localStorage.getItem("mpasi_history");
+      if (storedHistory) setHistory(JSON.parse(storedHistory));
 
       if (isSupabaseConfigured) {
         try {
@@ -917,6 +938,18 @@ export default function HomePage() {
       }
 
       setMatrix(data.matrix);
+
+      // Save to meal history (local, max 7 entries)
+      const newEntry: HistoryEntry = {
+        date: new Date().toISOString(),
+        matrix: data.matrix,
+        ingredients: [...ingredients],
+      };
+      setHistory((prev) => {
+        const updated = [newEntry, ...prev].slice(0, 7);
+        localStorage.setItem("mpasi_history", JSON.stringify(updated));
+        return updated;
+      });
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -1442,6 +1475,60 @@ export default function HomePage() {
                           </a>
                         </div>
                       </>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {/* ── Meal History Section ── */}
+              {history.length > 0 && (
+                <section className="px-6 pb-10 col-span-12 md:col-span-7 md:order-6 md:px-0 animate-fade-up">
+                  <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-default)" }}>
+                    <button
+                      onClick={() => setShowHistory((v) => !v)}
+                      className="w-full flex items-center justify-between px-5 py-4 cursor-pointer transition-all hover:bg-zinc-50"
+                      style={{ background: "var(--bg-card)" }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📅</span>
+                        <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
+                          {t.historyTitle}
+                        </h2>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(99,102,241,0.08)", color: "#4338ca", border: "1px solid rgba(99,102,241,0.2)" }}>
+                          {history.length}
+                        </span>
+                      </div>
+                      <IconChevron size={14} open={showHistory} />
+                    </button>
+
+                    {showHistory && (
+                      <div className="divide-y" style={{ borderColor: "var(--border-default)" }}>
+                        {history.map((entry, i) => {
+                          const d = new Date(entry.date);
+                          const dateLabel = d.toLocaleDateString(lang === "id" ? "id-ID" : "en-US", { weekday: "short", day: "numeric", month: "short" });
+                          const timeLabel = d.toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit" });
+                          return (
+                            <div key={i} className="px-5 py-3.5 flex items-center justify-between gap-3" style={{ background: "var(--bg-card)" }}>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                                  {dateLabel} · {timeLabel}
+                                </p>
+                                <p className="text-[10px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
+                                  {entry.ingredients.slice(0, 4).join(", ")}{entry.ingredients.length > 4 ? ` +${entry.ingredients.length - 4}` : ""}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => { setMatrix(entry.matrix); setShowHistory(false); }}
+                                className="flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
+                                style={{ background: "var(--bg-elevated)", color: "var(--color-brand-primary)", border: "1px solid rgba(42,140,96,0.2)" }}
+                              >
+                                {t.historyLoad}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 </section>
