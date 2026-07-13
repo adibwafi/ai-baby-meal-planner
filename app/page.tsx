@@ -337,6 +337,9 @@ function MealCard({
 }) {
   const t = TRANSLATIONS[lang];
   const [expanded, setExpanded] = useState(false);
+
+  if (!meal) return null;
+
   const delayClass = ["stagger-1","stagger-2","stagger-3","stagger-4","stagger-5"][index];
   const isBreakfast = slot.id === "breakfast";
 
@@ -810,7 +813,7 @@ export default function HomePage() {
         throw new Error(data.error);
       }
 
-      setMatrix(data);
+      setMatrix(data.matrix);
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -1232,7 +1235,7 @@ export default function HomePage() {
                         meal={matrix[slot.id]}
                         index={i}
                         onSaveFavorite={handleInitiateSave}
-                        isFavorite={favorites.some((f) => f.meal.name === matrix[slot.id].name)}
+                        isFavorite={matrix[slot.id] ? favorites.some((f) => f.meal?.name === matrix[slot.id].name) : false}
                         onStartCooking={(meal, slot) => {
                           setActiveCookingMeal(meal);
                           setActiveCookingSlot(slot);
