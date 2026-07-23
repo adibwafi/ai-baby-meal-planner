@@ -18,6 +18,7 @@ The **Smart Fridge MPASI Optimizer** is a Progressive Web Application (PWA) desi
 * **PWA Engine:** `@serwist/next` (v9.5.11) & `serwist` (Service Worker precaching, runtime caching, offline app shell)
 * **AI Orchestration:** `groq-sdk` (v1.3.0) invoking model `llama-3.3-70b-versatile`. (`@google/generative-ai` v0.24.1 installed as secondary dependency).
 * **Database & Cloud Storage:** Supabase PostgreSQL (`@supabase/supabase-js` v2.108.2) with automatic browser `localStorage` offline fallback.
+* **Semantic Caching & Job Queue:** Upstash Redis (`@upstash/redis`) for 24-hour LLM response caching and Upstash QStash (`@upstash/qstash`) for async background job execution.
 * **State Management:** React local state (`useState`, `useMemo`, `useEffect`) + sync layer (Supabase / `localStorage`).
 * **Mobile Shell:** Flutter SDK workspace skeleton located in `/mobile`.
 
@@ -25,8 +26,12 @@ The **Smart Fridge MPASI Optimizer** is a Progressive Web Application (PWA) desi
 * **Next.js Config (`next.config.ts`):** Wrapped with `withSerwist` (`swSrc: "public/sw.ts"`, disabled in dev mode). `reactStrictMode: true`.
 * **API Key Env Vars (`.env.local`):**
   * `GROQ_API_KEY` (Required for AI generation route)
-  * `NEXT_PUBLIC_SUPABASE_URL` (Optional for cloud sync)
-  * `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Optional for cloud sync)
+  * `NEXT_PUBLIC_SUPABASE_URL` (Required for cloud sync)
+  * `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Required for cloud sync)
+  * `UPSTASH_REDIS_REST_URL` & `UPSTASH_REDIS_REST_TOKEN` (Configured for 24-hour LLM response caching)
+  * `QSTASH_URL`, `QSTASH_TOKEN`, `QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY` (Configured for async background job queue)
+  * `NEXT_PUBLIC_APP_URL` (Configured for app base URL)
+
 
 ---
 
