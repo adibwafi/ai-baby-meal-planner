@@ -1,5 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { Redis } from "@upstash/redis";
+import { createHash } from "crypto";
 
 /* ── Types ────────────────────────────────────────────── */
 export interface MealEntry {
@@ -20,14 +22,50 @@ export interface MealMatrix {
   dinner: MealEntry;
   generatedAt: string;
   fridgeIngredients: string[];
+  cacheHit?: boolean;
+  cachedAt?: string;
 }
 
-/* ── System Prompt ────────────────────────────────────── */
-/* ── System Prompt Generator ──────────────────────────────── */
+/* ── Redis client (lazy init — safe if env vars missing) ─ */
+let redis: Redis | null = null;
+function getRedis(): Redis | null {
+  if (redis) return redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  try {
+    redis = new Redis({ url, token });
+    return redis;
+  } catch {
+    return null;
+  }
+}
+
+/* ── Cache key generator ──────────────────────────────── */
+// Deterministic hash: sorted ingredients + age + sorted allergies.
+// Order of input doesn't affect cache key — same combo always hits same cache.
+function buildCacheKey(
+  ingredients: string[],
+  ageMonths: number,
+  allergies: string[]
+): string {
+  const normalized = {
+    ingredients: [...ingredients].map((i) => i.toLowerCase().trim()).sort(),
+    ageMonths,
+    allergies: [...allergies].map((a) => a.toLowerCase().trim()).sort(),
+  };
+  const hash = createHash("sha256")
+    .update(JSON.stringify(normalized))
+    .digest("hex")
+    .slice(0, 16); // First 16 chars = 64-bit collision resistance, short enough for Redis key
+  return `mpasi:meals:${ageMonths}m:${hash}`;
+}
+
+/* ── System Prompt Generator ──────────────────────────── */
 function getSystemPrompt(ageMonths: number): string {
   let textureGuide = "";
   let ageRangeText = "";
-  
+
   if (ageMonths >= 6 && ageMonths <= 8) {
     ageRangeText = "bayi usia 6-8 bulan";
     textureGuide = `
@@ -80,7 +118,10 @@ STRICT CONSTRAINTS:
 function stripMarkdownFences(raw: string): string {
   let text = raw.trim();
   if (text.startsWith("```")) {
-    text = text.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
+    text = text
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "");
   }
   return text.trim();
 }
@@ -96,7 +137,7 @@ export async function POST(request: NextRequest) {
     const childAgeMonths: number = Number(body.childAgeMonths ?? 16);
 
     if (!ingredients.length) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Minimal 1 bahan harus diisi." },
         { status: 400 }
       );
@@ -105,32 +146,72 @@ export async function POST(request: NextRequest) {
     /* 2. Validate API key */
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Konfigurasi server bermasalah. GROQ_API_KEY belum diisi." },
         { status: 500 }
       );
     }
 
-    /* 3. Build user prompt & customized system prompt */
-    const allergyRules = allergies.length > 0 
-      ? `\nCRITICAL SAFETY CONSTRAINT: The child is ALLERGIC to: ${allergies.join(", ")}. Do NOT use these ingredients under any circumstances. Even if they are listed as available ingredients, EXCLUDE them from all recipes.` 
-      : "";
+    /* 3. Check Redis cache ─────────────────────────────────
+       Cache key is deterministic: sorted(ingredients) + age + sorted(allergies).
+       TTL = 86400s (24 hours) — valid for one full day of MPASI planning.
+       Cache is ingredient-level, not user-level (no PII stored in Redis).
+    ──────────────────────────────────────────────────────── */
+    const cacheKey = buildCacheKey(ingredients, childAgeMonths, allergies);
+    const client = getRedis();
+    let cacheHit = false;
+    let cachedAt: string | undefined;
+
+    if (client) {
+      try {
+        const cached = await client.get<{ matrix: MealMatrix; cachedAt: string }>(cacheKey);
+        if (cached && cached.matrix) {
+          const matrix: MealMatrix = {
+            ...cached.matrix,
+            generatedAt: cached.matrix.generatedAt,
+            fridgeIngredients: ingredients,
+            cacheHit: true,
+            cachedAt: cached.cachedAt,
+          };
+          return NextResponse.json(
+            { matrix },
+            {
+              status: 200,
+              headers: {
+                "X-Cache": "HIT",
+                "X-Cache-Key": cacheKey,
+                "Cache-Control": "no-store",
+              },
+            }
+          );
+        }
+      } catch (cacheErr) {
+        // Redis failure is non-fatal — fall through to Groq
+        console.warn("[generate-meals] Redis GET failed (non-fatal):", cacheErr);
+      }
+    }
+
+    /* 4. Build prompts */
+    const allergyRules =
+      allergies.length > 0
+        ? `\nCRITICAL SAFETY CONSTRAINT: The child is ALLERGIC to: ${allergies.join(
+            ", "
+          )}. Do NOT use these ingredients under any circumstances. Even if they are listed as available ingredients, EXCLUDE them from all recipes.`
+        : "";
 
     const dynamicSystemPrompt = `${getSystemPrompt(childAgeMonths)}${allergyRules}\nNote: The child's name is ${childName}. Make sure the recommendations fit.`;
 
-    const userPrompt = `Bahan-bahan di kulkasku saat ini:
-${ingredients.map((i, idx) => `${idx + 1}. ${i}`).join("\n")}
+    const userPrompt = `Bahan-bahan di kulkasku saat ini:\n${ingredients
+      .map((i, idx) => `${idx + 1}. ${i}`)
+      .join("\n")}\n\nBuatkan matrix 5 meal MPASI untuk ${childName} besok. Kembalikan hanya JSON yang valid.`;
 
-Buatkan matrix 5 meal MPASI untuk ${childName} besok. Kembalikan hanya JSON yang valid.`;
-
-    /* 4. Call Groq API (LLaMA 3.3 70B — fast & free) */
+    /* 5. Call Groq API */
     const groq = new Groq({ apiKey });
-
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: dynamicSystemPrompt },
-        { role: "user",   content: userPrompt },
+        { role: "user", content: userPrompt },
       ],
       temperature: 0.7,
       max_tokens: 2048,
@@ -138,54 +219,81 @@ Buatkan matrix 5 meal MPASI untuk ${childName} besok. Kembalikan hanya JSON yang
     });
 
     const rawText = completion.choices[0]?.message?.content ?? "";
-
     if (!rawText) {
-      return Response.json(
+      return NextResponse.json(
         { error: "AI tidak menghasilkan respons. Coba lagi." },
         { status: 502 }
       );
     }
 
-    /* 5. Parse JSON */
+    /* 6. Parse & validate JSON */
     const cleanText = stripMarkdownFences(rawText);
     let parsed: Record<string, MealEntry>;
     try {
       parsed = JSON.parse(cleanText);
     } catch {
       console.error("[generate-meals] JSON parse error:", cleanText.slice(0, 300));
-      return Response.json(
+      return NextResponse.json(
         { error: "AI menghasilkan format tidak valid. Coba lagi." },
         { status: 502 }
       );
     }
 
-    /* 6. Validate required keys */
     const requiredKeys = ["breakfast", "am_snack", "lunch", "pm_snack", "dinner"];
     const missing = requiredKeys.filter((k) => !(k in parsed));
     if (missing.length) {
-      return Response.json(
-        { error: `Respons AI tidak lengkap (missing: ${missing.join(", ")}). Coba lagi.` },
+      return NextResponse.json(
+        {
+          error: `Respons AI tidak lengkap (missing: ${missing.join(", ")}). Coba lagi.`,
+        },
         { status: 502 }
       );
     }
 
-    /* 7. Return meal matrix */
+    /* 7. Build matrix */
+    cachedAt = new Date().toISOString();
     const matrix: MealMatrix = {
       breakfast: parsed.breakfast,
-      am_snack:  parsed.am_snack,
-      lunch:     parsed.lunch,
-      pm_snack:  parsed.pm_snack,
-      dinner:    parsed.dinner,
-      generatedAt: new Date().toISOString(),
+      am_snack: parsed.am_snack,
+      lunch: parsed.lunch,
+      pm_snack: parsed.pm_snack,
+      dinner: parsed.dinner,
+      generatedAt: cachedAt,
       fridgeIngredients: ingredients,
+      cacheHit,
     };
 
-    return Response.json({ matrix }, { status: 200 });
+    /* 8. Store in Redis cache (TTL: 24 hours) ─────────────
+       Key pattern: mpasi:meals:{ageMonths}m:{hash}
+       Only the meal matrix is cached — no user PII.
+    ──────────────────────────────────────────────────────── */
+    if (client) {
+      try {
+        await client.set(
+          cacheKey,
+          JSON.stringify({ matrix, cachedAt }),
+          { ex: 86400 } // 24 hours TTL
+        );
+      } catch (cacheErr) {
+        console.warn("[generate-meals] Redis SET failed (non-fatal):", cacheErr);
+      }
+    }
 
+    return NextResponse.json(
+      { matrix },
+      {
+        status: 200,
+        headers: {
+          "X-Cache": "MISS",
+          "X-Cache-Key": cacheKey,
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[generate-meals] Unhandled:", message);
-    return Response.json(
+    return NextResponse.json(
       { error: "Terjadi kesalahan tidak terduga. Silakan coba lagi." },
       { status: 500 }
     );
