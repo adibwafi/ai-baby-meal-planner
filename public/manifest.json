@@ -1,13 +1,13 @@
 {
-  "name": "Smart Fridge MPASI Optimizer",
-  "short_name": "MPASI AI",
-  "description": "AI-powered 5-meal matrix planner for your toddler's daily nutrition — done in under 30 minutes.",
+  "name": "AI Baby Meal Planner — Smart Fridge MPASI Optimizer",
+  "short_name": "AI Baby Meal",
+  "description": "AI-powered 5-meal daily MPASI matrix planner for busy working parents — done in 30 seconds.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#0f766e",
   "background_color": "#0a0f0e",
-  "categories": ["food", "lifestyle", "health"],
+  "categories": ["food", "lifestyle", "health", "parenting"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -24,7 +24,7 @@
   ],
   "shortcuts": [
     {
-      "name": "Generate Today's Meals",
+      "name": "Generate Today's MPASI",
       "short_name": "Generate",
       "description": "Instantly generate a 5-meal matrix from your fridge",
       "url": "/?action=generate",
